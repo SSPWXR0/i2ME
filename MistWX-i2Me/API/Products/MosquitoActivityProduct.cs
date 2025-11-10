@@ -2,17 +2,17 @@ using MistWX_i2Me.Schema.ibm;
 
 namespace MistWX_i2Me.API.Products;
 
-public class AchesPainProduct : Base
+public class MosquitoActivityProduct : Base
 {
-    public AchesPainProduct()
+    public MosquitoActivityProduct()
     {
-        RecordName = "AchesAndPain";
+        RecordName = "MosquitoActivity";
         DataUrl =
             "https://api.weather.com/v2/indices/mosquito/daily/7day?geocode={geocode}&format=xml&language=en-US&apiKey={apiKey}";
     }
 
-    public async Task<List<GenericResponse<AchesPainResponse>>> Populate(string[] locations)
+    public async Task<List<GenericResponse<MosquitoActivityResponse>>> Populate(string[] locations)
     {
-        return await GetData<AchesPainResponse>(locations);
+        return await GetData<MosquitoActivityResponse>(locations);
     }
 }
