@@ -109,6 +109,14 @@ public class Config
             "MetroMapCity6",
             "MetroMapCity7",
             "MetroMapCity8",
+            "TideStation1",
+            "TideStation2",
+            "TideStation3",
+            "TideStation4",
+            "TideStation5",
+            "TideStation6",
+            "TideStation7",
+            "TideStation8",
         };
     }
 
@@ -141,5 +149,7 @@ public class Config
         [XmlElement] public bool Breathing { get; set; } = true;
         [XmlElement] public bool HeatingAndCooling { get; set; } = true;
         [XmlElement] public bool PollenForecast { get; set; } = true;
+        [XmlElement] public bool WateringNeeds { get; set; } = true;
+        [XmlElement] public bool TideForecast { get; set; } = true;
     }
 }

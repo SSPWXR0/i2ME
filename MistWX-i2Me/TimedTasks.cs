@@ -175,6 +175,22 @@ public class TimedTasks
                 sender.SendFile(brsRecord, "storeData(QGROUP=__Breathing__,Feed=Breathing)");
             }
 
+            if (dataConfig.TideForecast)
+            {
+                Log.Info($"Building Tide Forecast I2 record for {locations.Length} locations..");
+                List<GenericResponse<TideForecastResponse>> tfcst = await new TideForecastProduct().Populate(locations);
+                string tfcstRecord = await new TideForecastRecord().MakeRecord(tfcst);
+                sender.SendFile(tfcstRecord, "storeData(QGROUP=__TidesForecast__,Feed=TidesForecast)");
+            }
+
+            if (dataConfig.WateringNeeds)
+            {
+                Log.Info($"Building Watering Needs I2 record for {locations.Length} locations..");
+                List<GenericResponse<WateringNeedsResponse>> wns = await new WateringNeedsProduct().Populate(locations);
+                string wnsRecord = await new WateringNeedsRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__WateringNeeds__,Feed=WateringNeeds)");
+            }
+
             string nextTimestamp = DateTime.Now.AddSeconds(generationInterval).ToString("h:mm tt");
             
             watch.Stop();
