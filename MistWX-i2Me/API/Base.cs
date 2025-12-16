@@ -143,6 +143,16 @@ public class Base
             url = url.Replace("{cntryCd}", location.cntryCd);
         }
         
+        if (url.Contains("{curDate}"))
+        {
+            url = url.Replace("{curDate}", DateTime.Now.ToString("yyyyMMdd"));
+        }
+
+        if (url.Contains("{curDatePlusFive}"))
+        {
+            url = url.Replace("{curDatePlusFive}", DateTime.Now.AddDays(5).ToString("yyyyMMdd"));
+        }
+
         return url;
     }
 
