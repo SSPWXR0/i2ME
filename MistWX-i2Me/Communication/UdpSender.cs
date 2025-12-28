@@ -4,6 +4,7 @@ using TWC.I2.MsgEncode;
 using TWC.I2.MsgEncode.FEC;
 using TWC.I2.MsgEncode.ProcessingSteps;
 using TWC.Msg;
+using System.Diagnostics;
 
 
 namespace MistWX_i2Me.Communication;
@@ -70,17 +71,24 @@ public class UdpSender
         I2Msg msg = new I2Msg(fecTempFile);
         msg.Id = (uint)GetUnixTimeStampMillis();
         msg.Start();
-        uint count = msg.CalcMsgPacketCount();
-
-        uint packets = 0;
-        while (packets < count)
+        if (!Config.config.UseExecInstead)
         {
-            byte[] bytes = msg.GetNextPacket();
-            _udpClient.Send(bytes, bytes.Length, _endPoint);
-            packets++;
-            Thread.Sleep(2);
+            uint count = msg.CalcMsgPacketCount();
+
+            uint packets = 0;
+            while (packets < count)
+            {
+                byte[] bytes = msg.GetNextPacket();
+                _udpClient.Send(bytes, bytes.Length, _endPoint);
+                packets++;
+                Thread.Sleep(2);
+            }
+        } else
+        {
+            ProcessStartInfo procStartInfo = new ProcessStartInfo("C:/Program Files (x86)/TWC/i2/exec.exe");
+            procStartInfo.Arguments = $"-async {$"{command.Remove(command.Length - 1, 1)},File={fileName}"}";
+            Log.Debug($"Exec arguments: {procStartInfo.Arguments}");
         }
-        
         // Clean up
         msg.Dispose();
         inputStream.Close();

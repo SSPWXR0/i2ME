@@ -13,6 +13,7 @@ public class Config
     [XmlElement] public string TwcApiKey { get; set; } = "REPLACE_ME";
     [XmlElement] public string LogLevel { get; set; } = "info";
     [XmlElement] public bool GetAlerts { get; set; } = true;
+    [XmlElement] public bool UseExecInstead { get; set; } = true;
 
     // Used to process what locations to generate
     [XmlElement]
