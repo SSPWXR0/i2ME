@@ -90,7 +90,12 @@ public class TimedTasks
             Config.DataEndpointConfig dataConfig = Config.config.DataConfig;
             
             Log.Info("Running scheduled record collection");
-            
+            Log.Info("Clearing temp directory...");
+            System.IO.DirectoryInfo tempDir = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "temp"));
+            foreach (FileInfo file in tempDir.GetFiles())
+            {
+                file.Delete();
+            }
             // Implements suggestion #3 in the issue tracker.
             
             if (dataConfig.CurrentConditions)

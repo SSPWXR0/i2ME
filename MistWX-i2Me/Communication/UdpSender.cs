@@ -93,8 +93,6 @@ public class UdpSender
         // Clean up
         msg.Dispose();
         inputStream.Close();
-        File.Delete(fecTempFile);
-        File.Delete(tempFile);
     }
 
     public void SendCommand(string command, string headendId = null)
