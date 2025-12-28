@@ -378,7 +378,7 @@ public class AlertBulletin : I2Record
             {
                 Log.Debug(ex.StackTrace);
             }
-            return null;
+            return "";
         }
     }
 
