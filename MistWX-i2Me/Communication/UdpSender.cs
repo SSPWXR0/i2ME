@@ -88,6 +88,7 @@ public class UdpSender
             ProcessStartInfo procStartInfo = new ProcessStartInfo("C:/Program Files (x86)/TWC/i2/exec.exe");
             procStartInfo.Arguments = $"-async {$"{command.Remove(command.Length - 1, 1)},File={fileName}"}";
             Log.Debug($"Exec arguments: {procStartInfo.Arguments}");
+            Process.Start(procStartInfo);
         }
         // Clean up
         msg.Dispose();
