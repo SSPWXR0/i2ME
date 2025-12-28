@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Xml.Serialization;
 
 namespace MistWX_i2Me;
@@ -14,6 +15,14 @@ public class Config
     [XmlElement] public string LogLevel { get; set; } = "info";
     [XmlElement] public bool GetAlerts { get; set; } = true;
     [XmlElement] public bool UseExecInstead { get; set; } = true;
+    [XmlElement] public bool UseTideLocs { get; set; } = false;
+    [XmlElement] public bool UseMapLocs { get; set; } = false;
+    [XmlElement] public bool UseTravelLocs { get; set; } = false;
+    [XmlElement] public bool UseWinterGLocs { get; set; } = false;
+    [XmlElement] public bool UseSummerGLocs { get; set; } = false;
+    [XmlElement] public bool UseSubset1Locs { get; set; } = false;
+    [XmlElement] public bool UseSubset2Locs { get; set; } = false;
+
 
     // Used to process what locations to generate
     [XmlElement]
@@ -31,6 +40,28 @@ public class Config
     // Actual configuration setup \\
     
     public static Config config = new Config();
+    // Base locations.
+    public List<string> LocationList = new List<string> {
+            "PrimaryLocation",
+            "NearbyLocation1",
+            "NearbyLocation2",
+            "NearbyLocation3",
+            "NearbyLocation4",
+            "NearbyLocation5",
+            "NearbyLocation6",
+            "NearbyLocation7",
+            "NearbyLocation8",
+            "MetroMapCity1",
+            "MetroMapCity2",
+            "MetroMapCity3",
+            "MetroMapCity4",
+            "MetroMapCity5",
+            "MetroMapCity6",
+            "MetroMapCity7",
+            "MetroMapCity8",
+
+        };
+
 
     
     /// <summary>
@@ -44,6 +75,8 @@ public class Config
         XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
         namespaces.Add("", "");
         
+        
+
         // Create the temp directory if none exists
         if (!Directory.Exists(Path.Combine(AppContext.BaseDirectory, "temp")))
         {
@@ -66,6 +99,225 @@ public class Config
             if (deserializedConfig != null && deserializedConfig is Config cfg)
             {
                 config = cfg;
+                // Add tide locations
+                if (cfg.UseTideLocs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "TideStation1",
+                        "TideStation2",
+                        "TideStation3",
+                        "TideStation4",
+                        "TideStation5",
+                        "TideStation6",
+                        "TideStation7",
+                        "TideStation8",
+                    }
+                    );
+                    if (cfg.UseSubset1Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "TideStation1_1",
+                            "TideStation2_1",
+                            "TideStation3_1",
+                            "TideStation4_1",
+                            "TideStation5_1",
+                            "TideStation6_1",
+                            "TideStation7_1",
+                            "TideStation8_1",
+                        }
+                        );
+                    }
+                    if (cfg.UseSubset2Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "TideStation1_2",
+                            "TideStation2_2",
+                            "TideStation3_2",
+                            "TideStation4_2",
+                            "TideStation5_2",
+                            "TideStation6_2",
+                            "TideStation7_2",
+                            "TideStation8_2",
+                        }
+                        );
+                    }
+                }
+                // Add subset 1 locations
+                if (cfg.UseSubset1Locs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "PrimaryLocation_1",
+                        "NearbyLocation1_1",
+                        "NearbyLocation2_1",
+                        "NearbyLocation3_1",
+                        "NearbyLocation4_1",
+                        "NearbyLocation5_1",
+                        "NearbyLocation6_1",
+                        "NearbyLocation7_1",
+                        "NearbyLocation8_1",
+                        "MetroMapCity1_1",
+                        "MetroMapCity2_1",
+                        "MetroMapCity3_1",
+                        "MetroMapCity4_1",
+                        "MetroMapCity5_1",
+                        "MetroMapCity6_1",
+                        "MetroMapCity7_1",
+                        "MetroMapCity8_1",
+                    }
+                    );
+                }
+                // Add subset 2 locations
+                if (cfg.UseSubset2Locs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "PrimaryLocation_2",
+                        "NearbyLocation1_2",
+                        "NearbyLocation2_2",
+                        "NearbyLocation3_2",
+                        "NearbyLocation4_2",
+                        "NearbyLocation5_2",
+                        "NearbyLocation6_2",
+                        "NearbyLocation7_2",
+                        "NearbyLocation8_2",
+                        "MetroMapCity1_2",
+                        "MetroMapCity2_2",
+                        "MetroMapCity3_2",
+                        "MetroMapCity4_2",
+                        "MetroMapCity5_2",
+                        "MetroMapCity6_2",
+                        "MetroMapCity7_2",
+                        "MetroMapCity8_2",
+                    }
+                    );
+                }
+                // add map locations
+                if (cfg.UseMapLocs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "MapCity1",
+                        "MapCity2",
+                        "MapCity3",
+                        "MapCity4",
+                        "MapCity5",
+                        "MapCity6",
+                        "MapCity7",
+                        "MapCity8",
+                    }
+                    );
+                    if (cfg.UseSubset1Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "MapCity1_1",
+                            "MapCity2_1",
+                            "MapCity3_1",
+                            "MapCity4_1",
+                            "MapCity5_1",
+                            "MapCity6_1",
+                            "MapCity7_1",
+                            "MapCity8_1",
+                        }
+                        );
+                    }
+                    if (cfg.UseSubset2Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "MapCity1_2",
+                            "MapCity2_2",
+                            "MapCity3_2",
+                            "MapCity4_2",
+                            "MapCity5_2",
+                            "MapCity6_2",
+                            "MapCity7_2",
+                            "MapCity8_2",
+                        }
+                        );
+                    }
+                }
+                // add travel locations
+                if (cfg.UseTravelLocs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "TravelCity1",
+                        "TravelCity2",
+                        "TravelCity3",
+                        "TravelCity4",
+                        "TravelCity5",
+                        "TravelCity6",
+                        "TravelCity7",
+                        "TravelCity8",
+                    }
+                    );
+                    if (cfg.UseSubset1Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "TravelCity1_1",
+                            "TravelCity2_1",
+                            "TravelCity3_1",
+                            "TravelCity4_1",
+                            "TravelCity5_1",
+                            "TravelCity6_1",
+                            "TravelCity7_1",
+                            "TravelCity8_1",
+                        }
+                        );
+                    }
+                    if (cfg.UseSubset2Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "TravelCity1_2",
+                            "TravelCity2_2",
+                            "TravelCity3_2",
+                            "TravelCity4_2",
+                            "TravelCity5_2",
+                            "TravelCity6_2",
+                            "TravelCity7_2",
+                            "TravelCity8_2",
+                        }
+                        );
+                    }
+                }
+                // add winter getaway locations
+                if (cfg.UseWinterGLocs)
+                {
+                    cfg.LocationList.AddRange(new List<string>
+                    {
+                        "WinterGetawayLocation1",
+                        "WinterGetawayLocation2",
+                        "WinterGetawayLocation3",
+                    }
+                    );
+                    if (cfg.UseSubset1Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "WinterGetawayLocation1_1",
+                            "WinterGetawayLocation2_1",
+                            "WinterGetawayLocation3_1",
+                        }
+                        );
+                    }
+                    if (cfg.UseSubset2Locs)
+                    {
+                        cfg.LocationList.AddRange(new List<string>
+                        {
+                            "WinterGetawayLocation2_1",
+                            "WinterGetawayLocation2_2",
+                            "WinterGetawayLocation3_2",
+                        }
+                        );
+                    }
+                }
                 return config;
             }
 
@@ -90,35 +342,6 @@ public class Config
                 "USSD0283", "USNV0076", "USCA0967", "USUT0225", "USTX1200", "USCA0982", "USCA0987", "USWA0395",
                 "USWA0422", "USMO0787", "USFL0481", "USOK0537"
             };
-        [XmlArray("LocationKeys")] 
-        [XmlArrayItem("Key")] 
-        public List<string> LocationKeys { get; set; } = new List<string> {
-            "PrimaryLocation",
-            "NearbyLocation1",
-            "NearbyLocation2",
-            "NearbyLocation3",
-            "NearbyLocation4",
-            "NearbyLocation5",
-            "NearbyLocation6",
-            "NearbyLocation7",
-            "NearbyLocation8",
-            "MetroMapCity1",
-            "MetroMapCity2",
-            "MetroMapCity3",
-            "MetroMapCity4",
-            "MetroMapCity5",
-            "MetroMapCity6",
-            "MetroMapCity7",
-            "MetroMapCity8",
-            "TideStation1",
-            "TideStation2",
-            "TideStation3",
-            "TideStation4",
-            "TideStation5",
-            "TideStation6",
-            "TideStation7",
-            "TideStation8",
-        };
     }
 
     [XmlRoot("UnitConfig")]
