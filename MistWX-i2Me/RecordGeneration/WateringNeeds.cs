@@ -7,7 +7,7 @@ public class WateringNeedsRecord : I2Record
 {
     public async Task<string> MakeRecord(List<GenericResponse<WateringNeedsResponse>> results)
     {
-        Log.Info("Creating Mosquito Activity record.");
+        Log.Info("Creating Watering Needs record.");
         string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "WateringNeeds.xml");
         string recordScript = "<Data type=\"WateringNeeds\">";
 

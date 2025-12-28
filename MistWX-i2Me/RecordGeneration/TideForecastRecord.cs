@@ -7,7 +7,7 @@ public class TideForecastRecord : I2Record
 {
     public async Task<string> MakeRecord(List<GenericResponse<TideForecastResponse>> results)
     {
-        Log.Info("Creating current observations record..");
+        Log.Info("Creating Tide Forecast record..");
         string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "TideForecast.xml");
         string recordScript = "<Data type=\"TidesForecast\">";
 
