@@ -191,6 +191,14 @@ public class TimedTasks
                 sender.SendFile(wnsRecord, "storeData(QGROUP=__WateringNeeds__,Feed=WateringNeeds)");
             }
 
+            if (dataConfig.PollenObservations)
+            {
+                Log.Info($"Building Pollen Observations I2 record for {locations.Length} locations..");
+                List<GenericResponse<PollenObservationsResponse>> wns = await new PollenObservationsProduct().Populate(locations);
+                string wnsRecord = await new PollenObservationsRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__PollenObs__,Feed=PollenObs)");
+            }
+
             string nextTimestamp = DateTime.Now.AddSeconds(generationInterval).ToString("h:mm tt");
             
             watch.Stop();

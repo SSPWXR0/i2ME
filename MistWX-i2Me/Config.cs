@@ -375,5 +375,6 @@ public class Config
         [XmlElement] public bool PollenForecast { get; set; } = true;
         [XmlElement] public bool WateringNeeds { get; set; } = true;
         [XmlElement] public bool TideForecast { get; set; } = true;
+        [XmlElement] public bool PollenObservations { get; set; } = true;
     }
 }
