@@ -146,7 +146,6 @@ public class AlertBulletin : I2Record
         { "SU_W", "HE031" },
         { "TS_W", "HE031" }, // USA (not defined)
         { "tsunami_W", "HE031" }, // Canada
-        { "HW_W", "HE031" }, // Japan
         { "HW_E", "HE031" }, // Japan
         { "HSW-STD_W", "HE031" }, // Australia
         { "SWW_HT_STD_W", "HE031" }, // Australia
