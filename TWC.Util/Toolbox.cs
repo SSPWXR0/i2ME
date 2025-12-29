@@ -131,7 +131,7 @@ label_1:
       {
         return new FileStream(path1, FileMode.CreateNew);
       }
-      catch (IOException ex)
+      catch 
       {
         if (!File.Exists(path1))
           throw;
