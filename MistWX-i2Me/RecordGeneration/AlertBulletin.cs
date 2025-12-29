@@ -77,7 +77,6 @@ public class AlertBulletin : I2Record
         { "wind_W", "HE016" }, // Canada
         { "whWind_W", "HE016" }, // Canada
         { "TWA_W", "HE016" }, // Europe
-        { "WS_W", "HE016" }, // Japan
         { "WS_E", "HE016" }, // Japan
         { "RWA-W-STD_W", "HE016" }, // Australia
         { "RWA-W+-STD_W", "HE016" }, // Australia
