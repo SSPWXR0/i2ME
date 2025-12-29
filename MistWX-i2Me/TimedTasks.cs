@@ -199,6 +199,14 @@ public class TimedTasks
                 sender.SendFile(wnsRecord, "storeData(QGROUP=__PollenObs__,Feed=PollenObs)");
             }
 
+            if (dataConfig.TropicalAdvisory)
+            {
+                Log.Info($"Building Tropical Advisory I2 record for {locations.Length} locations..");
+                List<GenericResponse<TropicalAdvisoryResponse>> wns = await new TropicalAdvisoryProduct().Populate(locations);
+                string wnsRecord = await new TropicalAdvisoryRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__TropicalAdvisory__,Feed=TropicalAdvisory)");
+            }
+
             string nextTimestamp = DateTime.Now.AddSeconds(generationInterval).ToString("h:mm tt");
             
             watch.Stop();
