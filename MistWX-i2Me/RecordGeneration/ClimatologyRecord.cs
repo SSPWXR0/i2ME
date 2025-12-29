@@ -21,27 +21,50 @@ public class ClimatologyRecord : I2Record
             cliRecRes.Key = result.Location.cliStn;
             if (result.ParsedData.temperatureAverageMax != null)
             {
-                cliRec.AvgHigh = result.ParsedData.temperatureAverageMax.First();
+                if (result.ParsedData.temperatureAverageMax.First() != null)
+                {
+                    cliRec.AvgHigh = Convert.ToInt32(result.ParsedData.temperatureAverageMax.First());
+                }
+                
             }
             if (result.ParsedData.temperatureAverageMin != null)
             {
-               cliRec.AvgLow = result.ParsedData.temperatureAverageMin.First(); 
+                if (result.ParsedData.temperatureAverageMin.First() != null)
+                {
+                    cliRec.AvgLow = Convert.ToInt32(result.ParsedData.temperatureAverageMin.First());
+                }
+                
             }
             if (result.ParsedData.temperatureRecordMax != null)
             {
-                cliRec.RecHigh = result.ParsedData.temperatureRecordMax.First();
+                if (result.ParsedData.temperatureRecordMax.First() != null)
+                {
+                    cliRec.RecHigh = Convert.ToInt32(result.ParsedData.temperatureRecordMax.First());
+                }
+                
             }
             if (result.ParsedData.temperatureRecordMin != null)
             {
-                cliRec.RecLow = result.ParsedData.temperatureRecordMin.First();
+                if (result.ParsedData.temperatureRecordMin.First() != null)
+                {
+                    cliRec.RecLow = Convert.ToInt32(result.ParsedData.temperatureRecordMin.First());
+                }
+                
             }
             if (result.ParsedData.almanacRecordYearMax != null)
             {
-                cliRec.RecHighYear = result.ParsedData.almanacRecordYearMax.First();
+                if (result.ParsedData.almanacRecordYearMax.First() != null)
+                {
+                    cliRec.RecHighYear = Convert.ToInt32(result.ParsedData.almanacRecordYearMax.First());
+                }
+                
             }
             if (result.ParsedData.almanacRecordYearMin != null)
             {
-                cliRec.RecLowYear = result.ParsedData.almanacRecordYearMin.First();
+                if (result.ParsedData.almanacRecordYearMin.First() != null)
+                {
+                    cliRec.RecLowYear = result.ParsedData.almanacRecordYearMin.First();
+                }
             }
             
             cliRec.Year = System.DateTime.Now.Year;
