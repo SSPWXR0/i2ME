@@ -6,7 +6,7 @@ namespace MistWX_i2Me.Schema.twc;
 public class ClimatologyRec { 
 
 	[XmlAttribute(AttributeName="loc")] 
-	public int Loc { get; set; }  
+	public string Loc { get; set; }  
 
     [XmlAttribute(AttributeName="year")] 
 	public int Year { get; set; } 

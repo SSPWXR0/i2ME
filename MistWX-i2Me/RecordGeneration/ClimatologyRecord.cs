@@ -19,6 +19,7 @@ public class ClimatologyRecord : I2Record
             ClimatologyRecordResponse cliRecRes = new ClimatologyRecordResponse();
             ClimatologyRec cliRec = new ClimatologyRec();
             cliRecRes.Key = result.Location.cliStn;
+            cliRec.Loc = result.Location.cliStn;
             if (result.ParsedData.temperatureAverageMax != null)
             {
                 if (result.ParsedData.temperatureAverageMax.First() != null)
