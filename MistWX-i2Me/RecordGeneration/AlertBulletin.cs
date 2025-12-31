@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using System.Xml.Serialization;
 using Dapper;
@@ -393,6 +394,8 @@ public class AlertBulletin : I2Record
             return recordPath;
         }
 
+        int twcIdIdx = 0;
+
         foreach (var details in alertDetails)
         {
             var detail = details.ParsedData.alertDetail;
@@ -446,6 +449,8 @@ public class AlertBulletin : I2Record
                     break;
             }
             
+            bEvent.EStTmUTC = locationInfo.gmtDiff;
+            bEvent.ETWCIId = twcIdIdx.ToString();
             bEvent.EActionCd = eActionCd;
             bEvent.EOfficeId = eOfficeId;
 
@@ -469,6 +474,7 @@ public class AlertBulletin : I2Record
                 stateInfo.BSt = "International";
                 stateInfo.Text = "INTL";
             }
+            locations.BUTCDiff = locationInfo.gmtDiff;
             locations.BStCd = stateInfo;
             locations.BLocCd = loc;
             locations.BCntryCd = detail.countryCode;
@@ -487,6 +493,7 @@ public class AlertBulletin : I2Record
             narrative.BLn = detail.texts[0].description.Replace("\n", "");
             
             alerts.Add(record);
+            twcIdIdx += 1;
         }
 
         XmlSerializer serializer = new XmlSerializer(typeof(BERecordRoot));
