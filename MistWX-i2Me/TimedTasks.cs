@@ -5,6 +5,7 @@ using MistWX_i2Me.API.Products;
 using MistWX_i2Me.Communication;
 using MistWX_i2Me.RecordGeneration;
 using MistWX_i2Me.Schema.ibm;
+using MistWX_i2Me.Schema.twc;
 
 namespace MistWX_i2Me;
 
@@ -18,7 +19,7 @@ public class TimedTasks
     /// <param name="sender">UdpSender, prefer priority port</param>
     public static async Task CheckForAlerts(string[] locations, UdpSender sender, int checkInterval)
     {
-        if (Config.config.UseNationalLocations || !Config.config.GetAlerts)
+        if (Config.config.LocationConfig.UseNationalLocations || !Config.config.GetAlerts)
         {
             Log.Debug("Disabling alert generation.");
             return;
@@ -50,7 +51,7 @@ public class TimedTasks
     /// </summary>
     public static async Task ClearExpiredAlerts()
     {
-        if (Config.config.UseNationalLocations || !Config.config.GetAlerts)
+        if (Config.config.LocationConfig.UseNationalLocations || !Config.config.GetAlerts)
         {
             return;
         }
@@ -89,8 +90,8 @@ public class TimedTasks
             watch.Restart();
             Config.DataEndpointConfig dataConfig = Config.config.DataConfig;
             
-            Log.Info("Running hourly record collection");
-            
+            Log.Info("Running scheduled record collection");
+            Log.Info("Clearing temp directory...");
             // Implements suggestion #3 in the issue tracker.
             
             if (dataConfig.CurrentConditions)
@@ -100,6 +101,15 @@ public class TimedTasks
                     await new CurrentObservationsProduct().Populate(locations);
                 string obsRecord = await new CurrentObsRecord().MakeRecord(obs);
                 sender.SendFile(obsRecord, "storeData(QGROUP=__CurrentObservations__,Feed=CurrentObservations)");
+            }
+
+            if (dataConfig.MosquitoActivity)
+            {
+                Log.Info($"Building MosquitoActivity I2 record for {locations.Length} locations..");
+                List<GenericResponse<MosquitoActivityResponse>> mqs =
+                    await new MosquitoActivityProduct().Populate(locations);
+                string obsRecord = await new MosquitoActivityRecord().MakeRecord(mqs);
+                sender.SendFile(obsRecord, "storeData(QGROUP=__MosquitoActivity__,Feed=MosquitoActivity)");
             }
 
             if (dataConfig.DailyForecast)
@@ -116,6 +126,20 @@ public class TimedTasks
                 List<GenericResponse<HourlyForecastResponse>> hfs = await new HourlyForecastProduct().Populate(locations);
                 string hfsRecord = await new HourlyForecastRecord().MakeRecord(hfs);
                 sender.SendFile(hfsRecord, "storeData(QGROUP=__HourlyForecast__,Feed=HourlyForecast)");
+                if (dataConfig.DHRecord)
+                {
+                    Log.Info($"Building DHRecord I2 record for {locations.Length} locations..");
+                    string dhRecord = await new DHRecord().MakeRecord(hfs);
+                    sender.SendFile(hfsRecord, "storeData(QGROUP=__DHRecord__,Feed=DHRecord)");
+                }
+            }
+    
+            if (dataConfig.DrySkin)
+            {
+                Log.Info($"Building DrySkin I2 record for {locations.Length} locations..");
+                List<GenericResponse<DrySkinResponse>> hfs = await new DrySkinProduct().Populate(locations);
+                string hfsRecord = await new DrySkinRecord().MakeRecord(hfs);
+                sender.SendFile(hfsRecord, "storeData(QGROUP=__DrySkin__,Feed=DrySkin)");
             }
 
             if (dataConfig.AirQuality)
@@ -156,6 +180,54 @@ public class TimedTasks
                 List<GenericResponse<BreathingResponse>> brs = await new BreathingProduct().Populate(locations);
                 string brsRecord = await new BreathingRecord().MakeRecord(brs);
                 sender.SendFile(brsRecord, "storeData(QGROUP=__Breathing__,Feed=Breathing)");
+            }
+
+            if (dataConfig.TideForecast)
+            {
+                Log.Info($"Building Tide Forecast I2 record for {locations.Length} locations..");
+                List<GenericResponse<TideForecastResponse>> tfcst = await new TideForecastProduct().Populate(locations);
+                string tfcstRecord = await new TideForecastRecord().MakeRecord(tfcst);
+                sender.SendFile(tfcstRecord, "storeData(QGROUP=__TidesForecast__,Feed=TidesForecast)");
+            }
+
+            if (dataConfig.WateringNeeds)
+            {
+                Log.Info($"Building Watering Needs I2 record for {locations.Length} locations..");
+                List<GenericResponse<WateringNeedsResponse>> wns = await new WateringNeedsProduct().Populate(locations);
+                string wnsRecord = await new WateringNeedsRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__WateringNeeds__,Feed=WateringNeeds)");
+            }
+
+            if (dataConfig.PollenObservations)
+            {
+                Log.Info($"Building Pollen Observations I2 record for {locations.Length} locations..");
+                List<GenericResponse<PollenObservationsResponse>> wns = await new PollenObservationsProduct().Populate(locations);
+                string wnsRecord = await new PollenObservationsRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__PollenObs__,Feed=PollenObs)");
+            }
+
+            if (dataConfig.TropicalAdvisory)
+            {
+                Log.Info($"Building Tropical Advisory I2 record..");
+                List<GenericResponse<TropicalAdvisoryResponse>> wns = await new TropicalAdvisoryProduct().Populate();
+                string wnsRecord = await new TropicalAdvisoryRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__TropicalAdvisory__,Feed=TropicalAdvisory)");
+            }
+
+            if (dataConfig.ClimatologyRecord)
+            {
+                Log.Info($"Building Climatology Record I2 record for {locations.Length} locations..");
+                List<GenericResponse<Almanac1DayResponse>> wns = await new Almanac1DayProduct().Populate(locations);
+                string wnsRecord = await new ClimatologyRecord().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__ClimatologyRecord__,Feed=ClimatologyRecord)");
+            }
+
+            if (dataConfig.HolidayMapping)
+            {
+                Log.Info($"Building Holiday Mapping Record I2 record..");
+                HolidayMappingResponse wns = await new HolidayMappingProduct().Populate();
+                string wnsRecord = await new HolidayMapping().MakeRecord(wns);
+                sender.SendFile(wnsRecord, "storeData(QGROUP=__Mapping__,Feed=Mapping)");
             }
 
             string nextTimestamp = DateTime.Now.AddSeconds(generationInterval).ToString("h:mm tt");

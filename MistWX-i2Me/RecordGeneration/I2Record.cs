@@ -21,6 +21,10 @@ public class I2Record
         {
             Log.Warning("An error occurred while trying to process a record.");
             Log.Error(ex.Message);
+            if (!string.IsNullOrEmpty(ex.StackTrace))
+            {
+                Log.Debug(ex.StackTrace);
+            }
             return raw;
         }
     }

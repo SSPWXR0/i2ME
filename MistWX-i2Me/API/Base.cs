@@ -56,6 +56,14 @@ public class Base
         }
         catch (Exception ex)
         {
+            
+            Log.Debug($"Failed to Download Record for {url}");
+            Log.Debug(ex.Message);
+            // Print stacktrace to the debug console if applicable
+            if (!string.IsNullOrEmpty(ex.StackTrace))
+            {
+                Log.Debug(ex.StackTrace);
+            }
             return String.Empty;
         }
 
@@ -119,7 +127,47 @@ public class Base
                 url = url.Replace("{zone}", location.zoneId);
             }
         }
+
+        if (url.Contains("{locId}"))
+        {
+            url = url.Replace("{locId}", location.locId);
+        }
+
+        if (url.Contains("{locType}"))
+        {
+            url = url.Replace("{locType}", location.locType);
+        }
+
+        if (url.Contains("{cntryCd}"))
+        {
+            url = url.Replace("{cntryCd}", location.cntryCd);
+        }
         
+        if (url.Contains("{curDate}"))
+        {
+            url = url.Replace("{curDate}", DateTime.Now.ToString("yyyyMMdd"));
+        }
+
+        if (url.Contains("{curDatePlusFive}"))
+        {
+            url = url.Replace("{curDatePlusFive}", DateTime.Now.AddDays(5).ToString("yyyyMMdd"));
+        }
+
+        if (url.Contains("{day}"))
+        {
+            url = url.Replace("{day}", DateTime.Now.Day.ToString());
+        }
+
+        if (url.Contains("{month}"))
+        {
+            url = url.Replace("{month}", DateTime.Now.Month.ToString());
+        }
+
+        if (url.Contains("{unit}"))
+        {
+            url = url.Replace("{unit}", Config.config.LocalStarConfig.Unit);
+        }
+
         return url;
     }
 
@@ -135,7 +183,7 @@ public class Base
 
     public async Task<LFRecordLocation> GetLocInfo(string locId)
     {
-        if (locationCache.TryGetValue(locId, out LFRecordLocation cachedLocation))
+        if (locationCache.TryGetValue(locId, out LFRecordLocation? cachedLocation))
         {
             if (cachedLocation != null)
             {
@@ -183,7 +231,28 @@ public class Base
 
             if (string.IsNullOrEmpty(response))
             {
-                return results;
+                // Just keep going! - PB
+                // return results;
+                continue;
+            }
+
+            // For Current Observations they change the format of the XML depending on what unit you have - no go for i2
+            if (response.Contains("<metric>"))
+            {
+                response = response.Replace("<metric>", "<imperial>");
+                response = response.Replace("</metric>", "</imperial>");
+            }
+
+            if (response.Contains("<metric_si>"))
+            {
+                response = response.Replace("<metric_si>", "<imperial>");
+                response = response.Replace("</metric_si>", "</imperial>");
+            }
+
+            if (response.Contains("<uk_hybrid>"))
+            {
+                response = response.Replace("<uk_hybrid>", "<imperial>");
+                response = response.Replace("</uk_hybrid>", "</imperial>");
             }
 
             string data = GetInnerXml(response);
@@ -208,7 +277,10 @@ public class Base
             catch (InvalidOperationException ex)
             {
                 Log.Debug(ex.Message);
-                Log.Debug(ex.StackTrace);
+                if (!string.IsNullOrEmpty(ex.StackTrace))
+                {
+                    Log.Debug(ex.StackTrace);
+                }
                 Log.Warning($"Location {location} has no data for {RecordName}, skipping..");
             }
         }

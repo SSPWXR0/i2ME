@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using MistWX_i2Me;
 using MistWX_i2Me.API;
@@ -46,20 +47,27 @@ public class Program
 
         string[] locations;
         
-        if (config.UseNationalLocations)
+        if (config.LocationConfig.UseNationalLocations)
         {
             Log.Warning("Collecting data for national locations can take a while.");
-            locations = new string[]
+            if (config.LocationConfig.NationalLocations == null) 
             {
-                "USNM0004", "USGA0028", "USMD0018", "USME0017", "USMT0031", "USAL0054", "USND0037", "USID0025",
-                "USMA0046", "USNY0081", "USVT0033", "USNC0121", "USIL0225", "USOH0188", "USOH0195", "USTX0327",
-                "USCO0105", "USIA0231", "USMI0229", "USAZ0068", "USSC0140", "USCT0094", "USTX0617", "USIN0305",
-                "USFL0228", "USMO0460", "USNV0049", "USAR0337", "USCA0638", "USKY1096", "USTN0325", "USFL0316",
-                "USWI0455", "USMN0503", "USTN0357", "USLA0338", "USNY0996", "USNJ0355", "USVA0557", "USOK0400",
-                "USNE0363", "USFL0372", "USPA1276", "USAZ0166", "USPA1290", "USME0328", "USOR0275", "USNC0558",
-                "USSD0283", "USNV0076", "USCA0967", "USUT0225", "USTX1200", "USCA0982", "USCA0987", "USWA0395",
-                "USWA0422", "USMO0787", "USFL0481", "USOK0537"
-            };
+                locations = new string[]
+                {
+                    "USNM0004", "USGA0028", "USMD0018", "USME0017", "USMT0031", "USAL0054", "USND0037", "USID0025",
+                    "USMA0046", "USNY0081", "USVT0033", "USNC0121", "USIL0225", "USOH0188", "USOH0195", "USTX0327",
+                    "USCO0105", "USIA0231", "USMI0229", "USAZ0068", "USSC0140", "USCT0094", "USTX0617", "USIN0305",
+                    "USFL0228", "USMO0460", "USNV0049", "USAR0337", "USCA0638", "USKY1096", "USTN0325", "USFL0316",
+                    "USWI0455", "USMN0503", "USTN0357", "USLA0338", "USNY0996", "USNJ0355", "USVA0557", "USOK0400",
+                    "USNE0363", "USFL0372", "USPA1276", "USAZ0166", "USPA1290", "USME0328", "USOR0275", "USNC0558",
+                    "USSD0283", "USNV0076", "USCA0967", "USUT0225", "USTX1200", "USCA0982", "USCA0987", "USWA0395",
+                    "USWA0422", "USMO0787", "USFL0481", "USOK0537"
+                };
+            }
+            else
+            {
+                locations = config.LocationConfig.NationalLocations;
+            }
         }
         else
         {
@@ -106,52 +114,70 @@ public class Program
             mpc = (MachineProductConfig) new XmlSerializer(typeof(MachineProductConfig)).Deserialize(reader);
         }
 
-        var configLocationKeys = new List<string>
+        //TODO: Find a better way to do this.
+        var configLocationKeys = new List<string> 
         {
-            "PrimaryLocation",
-            "NearbyLocation1",
-            "NearbyLocation2",
-            "NearbyLocation3",
-            "NearbyLocation4",
-            "NearbyLocation5",
-            "NearbyLocation6",
-            "NearbyLocation7",
-            "NearbyLocation8",
-            "MetroMapCity1",
-            "MetroMapCity2",
-            "MetroMapCity3",
-            "MetroMapCity4",
-            "MetroMapCity5",
-            "MetroMapCity6",
-            "MetroMapCity7",
-            "MetroMapCity8",
-        };
+                "PrimaryLocation",
+                "NearbyLocation1",
+                "NearbyLocation2",
+                "NearbyLocation3",
+                "NearbyLocation4",
+                "NearbyLocation5",
+                "NearbyLocation6",
+                "NearbyLocation7",
+                "NearbyLocation8",
+                "MetroMapCity1",
+                "MetroMapCity2",
+                "MetroMapCity3",
+                "MetroMapCity4",
+                "MetroMapCity5",
+                "MetroMapCity6",
+                "MetroMapCity7",
+                "MetroMapCity8",
+            };
+        if (config.LocationConfig.LocationList != null) {
+            configLocationKeys = config.LocationConfig.LocationList;
+        }
 
         foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
         {
             if (configLocationKeys.Contains(i.Key))
             {
-                Log.Debug(i.Value);
+                Log.Debug($"{i.Key}: {i.Value}");
                 if (string.IsNullOrEmpty(i.Value.ToString()))
                 {
                     continue;
                 }
-
                 try
                 {
-                    string choppedValue = i.Value.ToString().Split("_")[2];
+                    if (Regex.IsMatch(i.Value.ToString(), @"^\d\d\d\d\d(?:,\d\d\d\d\d)*$")) {
+                        string[] choppedValues = i.Value.ToString().Split(",");
+                        foreach (string choppedValue in choppedValues)
+                        {
+                            locations.Add(choppedValue);
+                        }
+                    }
+                    else
+                    {
+                        string choppedValue = i.Value.ToString().Split("_")[2];
 
                     // Avoid duplicate locations from being added to the location list
                     if (locations.Contains(choppedValue))
                     {
                         continue;
                     }
-
-                    locations.Add(choppedValue);
+                        locations.Add(choppedValue);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    continue;
+                    Log.Debug($"Failed to configure locations for {i.Key}");
+                    Log.Debug(ex.Message);
+                    // Print stacktrace to the debug console if applicable
+                    if (!string.IsNullOrEmpty(ex.StackTrace))
+                    {
+                        Log.Debug(ex.StackTrace);
+                    }
                 }
             }
         }

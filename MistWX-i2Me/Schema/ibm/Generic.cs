@@ -13,6 +13,15 @@ public class CurrentObservationsMetadata
     public int status_code { get; set; }
 }
 
+public class TideForecastMetadata
+{
+    public string language { get; set; }
+    public string transaction_id { get; set; }
+    public string version { get; set; }
+    public string location_id { get; set; }
+    public string units { get; set; }
+    public int status_code { get; set; }
+}
 public class DailyForecastMetadata
 {
 
