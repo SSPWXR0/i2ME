@@ -128,6 +128,11 @@ public class Base
             }
         }
 
+        if (url.Contains("{cntyId}"))
+        {
+            url = url.Replace("{cntyId}", location.cntyId);
+        }
+
         if (url.Contains("{locId}"))
         {
             url = url.Replace("{locId}", location.locId);
