@@ -390,8 +390,7 @@ public class AlertBulletin : I2Record
 
         if (alertDetails.Count < 1)
         {
-            await File.WriteAllTextAsync(recordPath, "<Data type=\"BERecord\"><BERecord></BERecord></Data>");
-            return recordPath;
+            return null;
         }
 
         int twcIdIdx = 0;
@@ -492,12 +491,13 @@ public class AlertBulletin : I2Record
             narrative.BNarrTxtLang = "en_US";
             narrative.BLn = detail.texts[0].description.Replace("\n", "");
             
-            alerts.Add(record);
             twcIdIdx += 1;
+            alerts.Add(record);
         }
 
         XmlSerializer serializer = new XmlSerializer(typeof(BERecordRoot));
         XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+        
         ns.Add("", "");
         using (StreamWriter sw = new StreamWriter(recordPath))
         {
