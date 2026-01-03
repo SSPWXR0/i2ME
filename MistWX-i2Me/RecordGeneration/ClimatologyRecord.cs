@@ -75,8 +75,8 @@ public class ClimatologyRecord : I2Record
                 }
                 
                 cliRec.Year = System.DateTime.Now.Year;
-                cliRec.Month = System.DateTime.Now.Month;
-                cliRec.Day = System.DateTime.Now.Day;
+                cliRec.Month = Convert.ToInt32(System.DateTime.Now.ToString("MM"));
+                cliRec.Day = Convert.ToInt32(System.DateTime.Now.ToString("dd"));
 
                 cliRecList.Add(cliRec);
             }
