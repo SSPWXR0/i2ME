@@ -79,6 +79,22 @@ public class ClimatologyRecord : I2Record
                 cliRec.Day = result.ParsedData.almanacRecordDate[i].Substring(2,2);
 
                 cliRecList.Add(cliRec);
+                if (i == result.ParsedData.almanacInterval.Count() - 1)
+                {
+                    ClimatologyRec todayCliRec = new ClimatologyRec();
+                    todayCliRec.Loc = result.Location.cliStn;
+                    todayCliRec.AvgHigh = cliRec.AvgHigh;
+                    todayCliRec.AvgLow = cliRec.AvgLow;
+                    todayCliRec.RecHigh = cliRec.RecHigh;
+                    todayCliRec.RecHighYear = cliRec.RecHighYear;
+                    todayCliRec.RecLow = cliRec.RecLow;
+                    todayCliRec.RecLowYear = cliRec.RecLowYear;
+                    todayCliRec.Year = System.DateTime.Now.Year;
+                    todayCliRec.Month = System.DateTime.Now.ToString("MM");
+                    todayCliRec.Day = System.DateTime.Now.ToString("dd");
+
+                    cliRecList.Add(todayCliRec);
+                }
             }
             
 
