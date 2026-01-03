@@ -109,9 +109,7 @@ public class ClimatologyRecord : I2Record
             serializer.Serialize(xw, cliRecRes);
             sw.Close();
 
-            recordScript += 
-                $"<ClimatologyRecord>" +
-                $"<Key>{result.Location.cliStn}</Key>{sw.ToString()}</ClimatologyRecord>";
+            recordScript += sw.ToString();
         }
         
         recordScript += "</Data>";
