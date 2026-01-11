@@ -331,8 +331,7 @@ public class Config
                 "USWA0422", "USMO0787", "USFL0481", "USOK0537"
             };
 
-        [XmlArray("Locations")] 
-        [XmlArrayItem("Location")] 
+        [XmlIgnore] 
         // Base locations.
         public List<string> LocationList = new List<string> {
             "PrimaryLocation",
