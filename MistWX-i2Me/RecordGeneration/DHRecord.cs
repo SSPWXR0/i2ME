@@ -100,9 +100,7 @@ public class DHRecord : I2Record
             serializer.Serialize(xw, dHRecRes);
             sw.Close();
 
-            recordScript += 
-                $"<DHRecord>" +
-                $"<Key>{result.Location.cliStn}</Key>{sw.ToString()}</DHRecord>";
+            recordScript += sw.ToString();
         }
         
         recordScript += "</Data>";
