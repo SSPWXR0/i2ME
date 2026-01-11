@@ -183,6 +183,11 @@ public class Base
             url = url.Replace("{startMonth45Day}", DateTime.Now.Subtract(TimeSpan.FromDays(45)).ToString("MM"));
         }
 
+        if (url.Contains("{lang}"))
+        {
+            url = url.Replace("{lang}}", Config.config.LocalStarConfig.Language);
+        }
+
         return url;
     }
 
