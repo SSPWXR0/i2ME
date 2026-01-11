@@ -14,7 +14,7 @@ namespace MistWX_i2Me.API;
 public class Base
 {
     protected HttpClient Client = new HttpClient();
-    protected string ApiKey = Config.config.TwcApiKey;
+    protected string ApiKey = Config.config.APIConfig.TwcApiKey;
 
     protected string RecordName = String.Empty;
     protected string DataUrl = String.Empty;

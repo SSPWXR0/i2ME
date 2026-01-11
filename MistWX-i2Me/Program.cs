@@ -28,7 +28,7 @@ public class Program
 
         Config config = Config.Load();
 
-        if (config.TwcApiKey == "REPLACE_ME" || String.IsNullOrEmpty(config.TwcApiKey))
+        if (config.APIConfig.TwcApiKey == "REPLACE_ME" || String.IsNullOrEmpty(config.APIConfig.TwcApiKey))
         {
             Log.Error("No weather.com API key is currently set.");
             Log.Info("A valid weather.com API key needs to be set in Config.xml.");
@@ -74,8 +74,8 @@ public class Program
             locations = await GetMachineLocations(config);
         }
         
-        Task checkAlerts = TimedTasks.CheckForAlerts(locations, prioritySender, config.CheckAlertTimeSeconds);
-        Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.RecordGenTimeSeconds);
+        Task checkAlerts = TimedTasks.CheckForAlerts(locations, prioritySender, config.DConfig.RecordGenTimeSeconds);
+        Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.AConfig.CheckAlertTimeSeconds);
         Task clearAlertsCache = TimedTasks.ClearExpiredAlerts();
         
         await Task.WhenAll(checkAlerts, recordGenTask, clearAlertsCache);
