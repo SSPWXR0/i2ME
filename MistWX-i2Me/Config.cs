@@ -15,19 +15,10 @@ public class Config
     public XmlComment VersionComment { get { return new XmlDocument().CreateComment("DO NOT CHANGE THIS!"); } set { } }
     [XmlElement]
     public int Version {get; set;} = 1;
-    // Config Elements \\
-    [XmlAnyElement("TWCApiKeyComment")]
-    public XmlComment TWCApiKeyComment { get { return new XmlDocument().CreateComment("The API key given to you by The Weather Company. This is required!"); } set { } }
-    [XmlElement] public string TwcApiKey { get; set; } = "REPLACE_ME";
+
     [XmlAnyElement("LLevelComment")]
     public XmlComment LLevelComment { get { return new XmlDocument().CreateComment("This sets how verbose you would like i2ME to be. (ex: debug, info, warning, error)"); } set { } }
     [XmlElement] public string LogLevel { get; set; } = "info";
-
-    [XmlAnyElement("GetAlertsComment")]
-    public XmlComment GetAlertsComment { get { return new XmlDocument().CreateComment("Sets if you want i2ME to get alerts for your i2. Can be true or false."); } set { } }
-    [XmlElement] public bool GetAlerts { get; set; } = true;
-
-
 
     // Used to process what locations to generate
     [XmlAnyElement("MPCComment")]
@@ -35,20 +26,15 @@ public class Config
     public string MachineProductConfig { get; set; } =
         "C:\\Program Files (x86)\\TWC\\i2\\Managed\\Config\\MachineProductCfg.xml";
 
-    [XmlAnyElement("RecordGenTimeComment")]
-    public XmlComment RecordGenTimeComment { get { return new XmlDocument().CreateComment("Sets how long should i2ME wait before grabbing data."); } set { } }
-    [XmlElement] public int RecordGenTimeSeconds { get; set; } = 1800;      // Defaults to 30 minutes
-
-    [XmlAnyElement("CheckAlertTimeComment")]
-    public XmlComment CheckAlertTimeComment { get { return new XmlDocument().CreateComment("Sets how long should i2ME wait before grabbing alerts."); } set { } }
-    [XmlElement] public int CheckAlertTimeSeconds { get; set; } = 600;      // Defaults to 10 minutes
-    
+    // Config Elements \\
+    [XmlElement("APIKeyConfig")] public APIKeyConfig APIConfig { get; set; } = new APIKeyConfig();
+    [XmlElement("DataConfig")] public DataConfig DConfig { get; set; } = new DataConfig();
+    [XmlElement("AlertConfig")] public AlertConfig AConfig { get; set; } = new AlertConfig();
     [XmlElement("LocationConfig")] public LocConfig LocationConfig { get; set; } = new LocConfig();
     [XmlElement("UnitConfig")] public NetworkConfig UnitConfig { get; set; } = new NetworkConfig();
-
     [XmlElement("LocalConfig")] public LocalConfig LocalStarConfig { get; set; } = new LocalConfig();
     [XmlElement("RadarConfig")] public RadarConfig RadarConfiguration { get; set; } = new RadarConfig();
-    [XmlElement("DataConfig")] public DataEndpointConfig DataConfig { get; set; } = new DataEndpointConfig();
+    [XmlElement("RecordConfig")] public DataEndpointConfig EndpointConfig { get; set; } = new DataEndpointConfig();
 
     // Actual configuration setup \\
     
@@ -427,6 +413,20 @@ public class Config
         [XmlAnyElement("RadarServerComment")]
         public XmlComment RadarServerComment { get { return new XmlDocument().CreateComment("Radar server url."); } set { } }
         [XmlElement] public string RadarServerUrl { get; set; } = "REPLACE_ME";
+
+
+    }
+
+    [XmlRoot("AlertConfig")]
+    public class AlertConfig
+    {
+        [XmlAnyElement("GetAlertsComment")]
+        public XmlComment GetAlertsComment { get { return new XmlDocument().CreateComment("Sets if you want i2ME to get alerts for your i2. Can be true or false."); } set { } }
+        [XmlElement] public bool GetAlerts { get; set; } = true;
+
+        [XmlAnyElement("CheckAlertTimeComment")]
+        public XmlComment CheckAlertTimeComment { get { return new XmlDocument().CreateComment("Sets how long should i2ME wait before grabbing alerts."); } set { } }
+        [XmlElement] public int CheckAlertTimeSeconds { get; set; } = 600;      // Defaults to 10 minutes
     }
 
     [XmlRoot("LocalConfig")]
@@ -449,7 +449,23 @@ public class Config
         [XmlElement] public string Language { get; set; } = "en-US";
     }
 
+    [XmlRoot("ApiKeyConfig")]
+    public class APIKeyConfig
+    {
+        [XmlAnyElement("TWCApiKeyComment")]
+        public XmlComment TWCApiKeyComment { get { return new XmlDocument().CreateComment("The API key given to you by The Weather Company. This is required!"); } set { } }
+        [XmlElement] public string TwcApiKey { get; set; } = "REPLACE_ME";
+    }
+
     [XmlRoot("DataConfig")]
+    public class DataConfig
+    {
+        [XmlAnyElement("RecordGenTimeComment")]
+        public XmlComment RecordGenTimeComment { get { return new XmlDocument().CreateComment("Sets how long should i2ME wait before grabbing data."); } set { } }
+        [XmlElement] public int RecordGenTimeSeconds { get; set; } = 1800;      // Defaults to 30 minutes
+    }
+
+    [XmlRoot("RecordConfig")]
     public class DataEndpointConfig
     {
         public XmlComment DataEComment { get { return new XmlDocument().CreateComment("This defines which data record to generate and send to the i2. For more information, check out the MistWX-i2ME wiki."); } set { } }
