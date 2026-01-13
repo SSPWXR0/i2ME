@@ -189,12 +189,22 @@ public class TimedTasks
                 sender.SendFile(brsRecord, "storeData(QGROUP=__Breathing__,Feed=Breathing)");
             }
 
-            if (dataConfig.TideForecast)
+            if (dataConfig.TideForecast || dataConfig.TIRecord)
             {
-                Log.Info($"Building Tide Forecast I2 record for {locations.Length} locations..");
                 List<GenericResponse<TideForecastResponse>> tfcst = await new TideForecastProduct().Populate(locations);
-                string tfcstRecord = await new TideForecastRecord().MakeRecord(tfcst);
-                sender.SendFile(tfcstRecord, "storeData(QGROUP=__TidesForecast__,Feed=TidesForecast)");
+                if (dataConfig.TideForecast)
+                {
+                    Log.Info($"Building Tide Forecast I2 record for {locations.Length} locations..");
+                    string tfcstRecord = await new TideForecastRecord().MakeRecord(tfcst);
+                    sender.SendFile(tfcstRecord, "storeData(QGROUP=__TidesForecast__,Feed=TidesForecast)");
+                }
+                if (dataConfig.TIRecord)
+                {
+                    Log.Info($"Building TIRecord I2 for {locations.Length} locations..");
+                    string tiRecord = await new TIRecord().MakeRecord(tfcst);
+                    sender.SendFile(tiRecord, "storeData(QGROUP=__TIRecord__,Feed=TIRecord)");
+                }
+                
             }
 
             if (dataConfig.WateringNeeds)
