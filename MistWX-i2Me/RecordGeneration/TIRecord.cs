@@ -37,7 +37,7 @@ public class TIRecord : I2Record
             }
             
 
-            XmlSerializer serializer = new XmlSerializer(typeof(DHRecordResponse));
+            XmlSerializer serializer = new XmlSerializer(typeof(TIRecordResponse));
             StringWriter sw = new StringWriter();
             XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
             {
