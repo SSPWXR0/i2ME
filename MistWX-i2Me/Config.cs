@@ -411,6 +411,18 @@ public class Config
         public XmlComment SatRadEnableComment { get { return new XmlDocument().CreateComment("Enable satellite radar?"); } set { } }
         [XmlElement] public bool SatRadEnable { get; set; } = true;
 
+        [XmlAnyElement("RadarDefComment")]
+        public XmlComment RadarDefComment { get { return new XmlDocument().CreateComment("Set radar cut. Default is Radar-US."); } set { } }
+        [XmlElement] public string RadarDef { get; set; } = "Radar-US";
+
+        [XmlAnyElement("SatRadDefComment")]
+        public XmlComment SatRadDefComment { get { return new XmlDocument().CreateComment("Set satellite radar cut. Default is SatRad-US."); } set { } }
+        [XmlElement] public string SatRadDef { get; set; } = "SatRad-US";
+
+        [XmlAnyElement("RadarIntComment")]
+        public XmlComment RadarIntComment { get { return new XmlDocument().CreateComment("Set how often should radar update. Default is 300."); } set { } }
+        [XmlElement] public int RadarInt { get; set; } = 300;
+
     }
 
     [XmlRoot("AlertConfig")]
