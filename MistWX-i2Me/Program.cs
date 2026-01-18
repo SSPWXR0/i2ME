@@ -513,7 +513,7 @@ public class Program
                     TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(point.ParsedData.location.ianaTimeZone);
                     tempLF.tmZnNm = tz.StandardName;
                     tempLF.tmZnAbbr = Regex.Replace(tz.StandardName, "[^A-Z]", "");
-                    tempLF.gmtDiff = tz.BaseUtcOffset.ToString(@"h\.mm");
+                    tempLF.gmtDiff = $"{tz.BaseUtcOffset.Hours}.{tz.BaseUtcOffset.Minutes}";
                 }
 
                 // Set wmoId and pllnId
