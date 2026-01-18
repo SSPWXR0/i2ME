@@ -403,6 +403,13 @@ public class Config
         public XmlComment RadarServerComment { get { return new XmlDocument().CreateComment("Radar server url."); } set { } }
         [XmlElement] public string RadarServerUrl { get; set; } = "REPLACE_ME";
 
+        [XmlAnyElement("RadarEnableComment")]
+        public XmlComment RadarEnableComment { get { return new XmlDocument().CreateComment("Enable radar?"); } set { } }
+        [XmlElement] public bool RadarEnable { get; set; } = true;
+
+        [XmlAnyElement("SatRadEnableComment")]
+        public XmlComment SatRadEnableComment { get { return new XmlDocument().CreateComment("Enable satellite radar?"); } set { } }
+        [XmlElement] public bool SatRadEnable { get; set; } = true;
 
     }
 
