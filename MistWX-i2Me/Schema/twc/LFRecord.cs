@@ -156,5 +156,5 @@ public class LFRecordResponse {
     public LFRecordHeader? LFRecordHeader { get; set; }
 
     [XmlElement(ElementName="LFData")]
-    public List<LFRecordData>? LFRecordData { get; set; }
+    public LFRecordData? LFRecordData { get; set; }
 }
