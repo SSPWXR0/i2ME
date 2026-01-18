@@ -12,8 +12,8 @@ public class RadarImageryProduct : Base
             "https://api.weather.com/v3/TileServer/series/productSet?apiKey={apiKey}&filter=twcRadarMosaic,sat";
     }
 
-    public async Task<List<GenericResponse<RadarImageryResponse>>> Populate(string[] locations)
+    public async Task<GenericResponse<RadarImageryResponse>?> Populate()
     {
-        return await GetJsonData<RadarImageryResponse>(locations);
+        return await GetJsonDataLFR<RadarImageryResponse>(new LFRecordLocation());
     }
 }
