@@ -491,7 +491,8 @@ public class Base
                 {
                     return new GenericResponse<T>(locationInfo, response, deserializedData);
                 }
-                throw new Exception("Data is null!");
+                Log.Warning("Data is null!");
+                return null;
             }
             catch (JsonException exception)
             {
@@ -505,6 +506,7 @@ public class Base
                 }
             }
         }
-        throw new Exception($"{RecordName} returned no data for location {location}.");
+        Log.Warning($"{RecordName} returned no data for location {location}.");
+        return null;
     }
 }
