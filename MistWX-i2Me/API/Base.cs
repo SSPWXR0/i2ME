@@ -212,7 +212,7 @@ public class Base
         }
         
         SQLiteConnection sqlite =
-            new SQLiteConnection($"Data Source={Path.Combine(AppContext.BaseDirectory, "Data", "LFRecord.db")}", true);
+            new SQLiteConnection($"Data Source={Path.Combine(AppContext.BaseDirectory, "Custom", "LFRecord.db")}", true);
         
         await sqlite.OpenAsync();
 
@@ -343,6 +343,92 @@ public class Base
         return results;
     }
 
+    public async Task<GenericResponse<T>> GetDataLFR<T>(LFRecordLocation location)
+    {
+
+
+        LFRecordLocation locationInfo = location;
+        string? response = await DownloadLocationData(locationInfo);
+
+        if (string.IsNullOrEmpty(response))
+        {
+            throw new Exception("Response was null!");
+        }
+
+        // Start Fix
+        string? GetXmlValue(string xml, string tagName)
+        {
+            string startTag = $"<{tagName}>";
+            int start = xml.IndexOf(startTag);
+            if (start == -1) return null;
+            start += startTag.Length;
+            int end = xml.IndexOf($"</{tagName}>", start);
+            if (end == -1) return null;
+            return xml.Substring(start, end - start);
+        }
+
+        string? tempVal = GetXmlValue(response, "temp");
+        string? iconVal = GetXmlValue(response, "iconCodeExt") ?? GetXmlValue(response, "icon_extd");
+        string? vocalKeyVal = GetXmlValue(response, "vocalKey") ?? GetXmlValue(response, "vocal_key");
+
+        int temp = 0;
+        int iconCodeExt = 0;
+            
+        if (int.TryParse(tempVal, out int t)) temp = t;
+        if (int.TryParse(iconVal, out int i)) iconCodeExt = i;
+
+        List<string> unitTags = new List<string> { "metric", "metric_si", "uk_hybrid" };
+
+        // For Current Observations they change the format of the XML depending on what unit you have - no go for i2
+        if (! response.Contains("<imperial>"))
+        {
+            foreach (string unitTag in unitTags)
+            {
+                if (response.Contains($"<{unitTag}>"))
+                {
+                    response = response.Replace(unitTag, "imperial");
+                    response = response.Replace($"</{unitTag}>", "</imperial>");
+                }
+            }
+            
+
+            if (vocalKeyVal != null)
+            {
+                string newVocalKey = vocalKeyBuilder(temp, iconCodeExt);
+                response = response.Replace(vocalKeyVal, newVocalKey);
+            }
+        }
+            
+        string data = GetInnerXml(response);
+
+        try
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+
+            using (StringReader reader = new StringReader(response))
+            {
+                var deserializedData = (T?)serializer.Deserialize(reader);
+
+                if (deserializedData == null)
+                {
+                    throw new Exception($"Failed to deserialize {RecordName} for location {location}");
+                }
+
+                return new GenericResponse<T>(locationInfo, data, deserializedData);
+            }
+        }
+            catch (InvalidOperationException ex)
+            {
+                Log.Debug(ex.Message);
+                if (!string.IsNullOrEmpty(ex.StackTrace))
+                {
+                    Log.Debug(ex.StackTrace);
+                }
+                throw new Exception($"Location {location} has no data for {RecordName}, skipping..");
+            }
+    }
+    
+
     /// <summary>
     /// Creates a list of GenericResponse objects for JSON endpoints.
     /// </summary>
@@ -386,5 +472,41 @@ public class Base
         }
 
         return results;
+    }
+
+
+    public async Task<GenericResponse<T>> GetJsonDataLFR<T>(LFRecordLocation location)
+    {
+
+        LFRecordLocation locationInfo = location;
+        string? response = await DownloadLocationData(locationInfo);
+
+        if (!string.IsNullOrEmpty(response))
+        {
+            using var stream = StreamFromString(response);
+            try
+            {
+                T? deserializedData = await JsonSerializer.DeserializeAsync<T?>(stream);
+                if (deserializedData != null)
+                {
+                    return new GenericResponse<T>(locationInfo, response, deserializedData);
+                }
+                Log.Warning("Data is null!");
+                return null;
+            }
+            catch (JsonException exception)
+            {
+                Log.Error($"Failed to parse {RecordName} data for location {location}.");
+                Log.Debug(exception.Message);
+
+                // Print stacktrace to the debug console if applicable
+                if (!string.IsNullOrEmpty(exception.StackTrace))
+                {
+                        Log.Debug(exception.StackTrace);
+                }
+            }
+        }
+        Log.Warning($"{RecordName} returned no data for location {location}.");
+        return null;
     }
 }

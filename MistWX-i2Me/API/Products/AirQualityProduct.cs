@@ -1,4 +1,5 @@
 using MistWX_i2Me.Schema.ibm;
+using MistWX_i2Me.Schema.System;
 
 namespace MistWX_i2Me.API.Products;
 
@@ -13,5 +14,10 @@ public class AirQualityProduct : Base
     public async Task<List<GenericResponse<AirQualityResponse>>> Populate(string[] locations)
     {
         return await GetData<AirQualityResponse>(locations);
+    }
+
+    public async Task<GenericResponse<AirQualityResponse>> Receive(LFRecordLocation locations)
+    {
+        return await GetDataLFR<AirQualityResponse>(locations);
     }
 }

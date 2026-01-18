@@ -1,4 +1,5 @@
 using MistWX_i2Me.Schema.ibm;
+using MistWX_i2Me.Schema.System;
 
 namespace MistWX_i2Me.API.Products;
 
@@ -14,5 +15,10 @@ public class Almanac1DayProduct : Base
     public async Task<List<GenericResponse<Almanac1DayResponse>>> Populate(string[] locations)
     {
         return await GetJsonData<Almanac1DayResponse>(locations);
+    }
+
+    public async Task<GenericResponse<Almanac1DayResponse>> Receive(LFRecordLocation location)
+    {
+        return await GetJsonDataLFR<Almanac1DayResponse>(location);
     }
 }
