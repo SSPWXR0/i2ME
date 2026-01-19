@@ -447,8 +447,11 @@ public class AlertBulletin : I2Record
                     eActionCd.Text = "NEW";
                     break;
             }
+            if (locationInfo.gmtDiff != null)
+            {
+                bEvent.EStTmUTC = locationInfo.gmtDiff;
+            }
             
-            bEvent.EStTmUTC = locationInfo.gmtDiff;
             bEvent.ETWCIId = twcIdIdx.ToString();
             bEvent.EActionCd = eActionCd;
             bEvent.EOfficeId = eOfficeId;
@@ -473,7 +476,11 @@ public class AlertBulletin : I2Record
                 stateInfo.BSt = "International";
                 stateInfo.Text = "INTL";
             }
-            locations.BUTCDiff = locationInfo.gmtDiff;
+            if (locationInfo.gmtDiff != null)
+            {
+                locations.BUTCDiff = locationInfo.gmtDiff;
+            }
+            
             locations.BStCd = stateInfo;
             locations.BLocCd = loc;
             locations.BCntryCd = detail.countryCode;
