@@ -220,11 +220,19 @@ public class Program
         
         File.Copy(config.MachineProductConfig, copyPath);
 
-        MachineProductConfig mpc;
+        MachineProductConfig? mpc = null;
         
-        using (var reader = new StreamReader(copyPath))
+        using (StreamReader reader = new(copyPath))
         {
-            mpc = (MachineProductConfig) new XmlSerializer(typeof(MachineProductConfig)).Deserialize(reader);
+            XmlSerializer serializer = new(typeof(MachineProductConfig));
+            if (reader != null)
+            {
+                mpc = (MachineProductConfig?)serializer.Deserialize(reader);
+            } else
+            {
+                throw new Exception("MachineProductCfg could not be read!");
+            }
+            
         }
 
         //TODO: Find a better way to do this.
@@ -252,45 +260,49 @@ public class Program
             configLocationKeys = config.LocationConfig.LocationList;
         }
 
-        foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
+        if (mpc != null)
         {
-            if (configLocationKeys.Contains(i.Key))
+            foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
             {
-                Log.Debug($"{i.Key}: {i.Value}");
-                if (string.IsNullOrEmpty(i.Value.ToString()))
+                if (configLocationKeys.Contains(i.Key))
                 {
-                    continue;
-                }
-                try
-                {
-                    if (Regex.IsMatch(i.Value.ToString(), @"^\d\d\d\d\d(?:,\d\d\d\d\d)*$")) {
-                        string[] choppedValues = i.Value.ToString().Split(",");
-                        locations.Add(choppedValues);
-                    }
-                    else
-                    {
-                        string[] choppedValues = i.Value.ToString().Split("_");
-
-                    // Avoid duplicate locations from being added to the location list
-                    if (locations.Contains(choppedValues.GetValue(2)))
+                    Log.Debug($"{i.Key}: {i.Value}");
+                    if (string.IsNullOrEmpty(i.Value.ToString()))
                     {
                         continue;
                     }
-                        locations.Add(choppedValues);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Debug($"Failed to configure locations for {i.Key}");
-                    Log.Debug(ex.Message);
-                    // Print stacktrace to the debug console if applicable
-                    if (!string.IsNullOrEmpty(ex.StackTrace))
+                    try
                     {
-                        Log.Debug(ex.StackTrace);
+                        if (Regex.IsMatch(i.Value.ToString(), @"^\d\d\d\d\d(?:,\d\d\d\d\d)*$")) {
+                            string[] choppedValues = i.Value.ToString().Split(",");
+                            locations.Add(choppedValues);
+                        }
+                        else
+                        {
+                            string[] choppedValues = i.Value.ToString().Split("_");
+
+                        // Avoid duplicate locations from being added to the location list
+                        if (locations.Contains(choppedValues.GetValue(2)))
+                        {
+                            continue;
+                        }
+                            locations.Add(choppedValues);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Debug($"Failed to configure locations for {i.Key}");
+                        Log.Debug(ex.Message);
+                        // Print stacktrace to the debug console if applicable
+                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                        {
+                            Log.Debug(ex.StackTrace);
+                        }
                     }
                 }
             }
         }
+        
         
         return locations.ToArray();
     }
@@ -338,7 +350,7 @@ public class Program
         tempLF.dmaCd = null;
 
         // Grab data.
-        GenericResponse<LocServPointResponse> point = await new LocServPointProduct().Receive(tempLF);
+        GenericResponse<LocServPointResponse>? point = await new LocServPointProduct().Receive(tempLF);
 
         if (point != null)
         {
@@ -532,17 +544,17 @@ public class Program
                     tempLF.dmaCd = point.ParsedData.location.dmaCd;
                 }
 
-                GenericResponse<LocServNearAirportResponse> airport = await new LocServNearAirportProduct().Receive(tempLF);
-                GenericResponse<LocServNearSkiResponse> ski = await new LocServNearSki().Receive(tempLF);
-                GenericResponse<LocServNearObsResponse> obs = await new LocServNearObs().Receive(tempLF);
-                GenericResponse<Almanac1DayResponse> al = await new Almanac1DayProduct().Receive(tempLF);
-                GenericResponse<CurrentObservations2Response> cc = await new CurrentObservationsProduct2().Receive(tempLF);
+                GenericResponse<LocServNearAirportResponse>? airport = await new LocServNearAirportProduct().Receive(tempLF);
+                GenericResponse<LocServNearSkiResponse>? ski = await new LocServNearSki().Receive(tempLF);
+                GenericResponse<LocServNearObsResponse>? obs = await new LocServNearObs().Receive(tempLF);
+                GenericResponse<Almanac1DayResponse>? al = await new Almanac1DayProduct().Receive(tempLF);
+                GenericResponse<CurrentObservations2Response>? cc = await new CurrentObservationsProduct2().Receive(tempLF);
 
                 if (airport != null)
                 {
                     if (airport.ParsedData.location.iataCode != null)
                     {
-                        foreach (string apId in airport.ParsedData.location.iataCode)
+                        foreach (string? apId in airport.ParsedData.location.iataCode)
                         {
                             if (apId != null)
                             {
@@ -558,7 +570,7 @@ public class Program
                 {
                     if (ski.ParsedData.location.skiId != null)
                     {
-                        foreach (string skiId in ski.ParsedData.location.skiId)
+                        foreach (string? skiId in ski.ParsedData.location.skiId)
                         {
                             if (skiId != null)
                             {
@@ -572,7 +584,7 @@ public class Program
                 if (obs != null)
                 {
                     int obsIdx = 0;
-                    foreach (string obsId in obs.ParsedData.location.stationId)
+                    foreach (string? obsId in obs.ParsedData.location.stationId)
                     {
                         if (obsId != null)
                         {
