@@ -17,7 +17,7 @@ public class Almanac1DayProduct : Base
         return await GetJsonData<Almanac1DayResponse>(locations);
     }
 
-    public async Task<GenericResponse<Almanac1DayResponse>> Receive(LFRecordLocation location)
+    public async Task<GenericResponse<Almanac1DayResponse>?> Receive(LFRecordLocation location)
     {
         return await GetJsonDataLFR<Almanac1DayResponse>(location);
     }
