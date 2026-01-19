@@ -17,7 +17,7 @@ public class CurrentObservationsProduct : Base
         return await GetData<CurrentObservationsResponse>(locations);
     }
 
-    public async Task<GenericResponse<CurrentObservationsResponse>> Receive(LFRecordLocation locations)
+    public async Task<GenericResponse<CurrentObservationsResponse>?> Receive(LFRecordLocation locations)
     {
         return await GetDataLFR<CurrentObservationsResponse>(locations);
     }
