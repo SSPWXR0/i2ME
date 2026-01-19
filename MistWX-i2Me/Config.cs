@@ -403,6 +403,33 @@ public class Config
         public XmlComment RadarServerComment { get { return new XmlDocument().CreateComment("Radar server url."); } set { } }
         [XmlElement] public string RadarServerUrl { get; set; } = "REPLACE_ME";
 
+        [XmlAnyElement("RadarEnableComment")]
+        public XmlComment RadarEnableComment { get { return new XmlDocument().CreateComment("Enable radar?"); } set { } }
+        [XmlElement] public bool RadarEnable { get; set; } = true;
+
+        [XmlAnyElement("SatRadEnableComment")]
+        public XmlComment SatRadEnableComment { get { return new XmlDocument().CreateComment("Enable satellite radar?"); } set { } }
+        [XmlElement] public bool SatRadEnable { get; set; } = true;
+
+        [XmlAnyElement("RadarDefComment")]
+        public XmlComment RadarDefComment { get { return new XmlDocument().CreateComment("Set radar cut. Default is Radar-US."); } set { } }
+        [XmlElement] public string RadarDef { get; set; } = "Radar-US";
+
+        [XmlAnyElement("SatRadDefComment")]
+        public XmlComment SatRadDefComment { get { return new XmlDocument().CreateComment("Set satellite radar cut. Default is SatRad-US."); } set { } }
+        [XmlElement] public string SatRadDef { get; set; } = "SatRad-US";
+
+        [XmlAnyElement("RadarIntComment")]
+        public XmlComment RadarIntComment { get { return new XmlDocument().CreateComment("Set how often should radar update. Default is 300."); } set { } }
+        [XmlElement] public int RadarInt { get; set; } = 300;
+
+        [XmlAnyElement("LocalRadarComment")]
+        public XmlComment LocalRadarComment { get { return new XmlDocument().CreateComment("Grab the tiles nearby the center of your map instead of the entire map. Set to true since downloading every single tile for the national map takes a lot of time."); } set { } }
+        [XmlElement] public bool LocalRadar { get; set; } = true;
+
+        [XmlAnyElement("LocalRadarRadiusComment")]
+        public XmlComment LocalRadarRadiusComment { get { return new XmlDocument().CreateComment("ONLY WORKS WITH LOCALRADAR! Add extra tiles. For example, a radius of 1 results in a 3x3 radius, a radius of 2 results in a 5x5, etc"); } set { } }
+        [XmlElement] public int LocalRadarRadius { get; set; } = 1;
 
     }
 

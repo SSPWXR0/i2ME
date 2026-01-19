@@ -84,7 +84,7 @@ public class TimedTasks
         }
 
     }
-    
+
     public static async Task RecordGenTask(string[] locations, UdpSender sender, int generationInterval)
     {
         var watch = Stopwatch.StartNew();
@@ -255,6 +255,95 @@ public class TimedTasks
             Log.Info($"Next record generation will be at {nextTimestamp}");
             
             await Task.Delay(generationInterval * 1000);
+        }
+    }
+
+    public static async Task RadarTask(UdpSender sender, int generationInterval)
+    {
+        await Task.Delay(generationInterval * 1000);
+        var watch = Stopwatch.StartNew();
+        Config.RadarConfig radarConfig = Config.config.RadarConfiguration;
+
+        if (radarConfig.RadarEnable != true && radarConfig.SatRadEnable != true)
+        {
+            Log.Info("Both radar and satrad are disabled, disabling radar generation...");
+            return;
+        }
+        
+        while (true)
+        {
+            watch.Restart();
+            
+            List<Task> taskList = new();
+            
+            Log.Info("Running scheduled radar/satrad collection");
+            
+            // start grabbing all timestamps
+            Log.Info($"Grabbing all radar/satrad timestamps...");
+            GenericResponse<RadarImageryResponse>? rdi = await new RadarImageryProduct().Populate();
+
+            if (rdi != null)
+            {
+                if (radarConfig.RadarEnable)
+                {
+                    Log.Info($"Generating radar frames...");
+                    if (rdi.ParsedData.seriesInfo != null)
+                    {
+                        if (rdi.ParsedData.seriesInfo.twcRadarMosaic != null)
+                        {
+                            if (rdi.ParsedData.seriesInfo.twcRadarMosaic.series != null)
+                            {
+                                taskList.Add(new RadarProcess().Run(radarConfig.RadarDef, rdi.ParsedData.seriesInfo.twcRadarMosaic.series.Select(ts => ts.ts).ToArray(), sender, "twcRadarMosaic"));
+                            } else {
+                                Log.Warning("No radar timestamps.");
+                                Log.Debug("No series!");
+                            }
+                        } else {
+                            Log.Warning("No radar timestamps.");
+                            Log.Debug("No twcRadarMosaic!");
+                        }
+                    } else {
+                        Log.Warning("No radar timestamps.");
+                        Log.Debug("No seriesInfo!");
+                    }
+                }
+                if (radarConfig.SatRadEnable)
+                {
+                    Log.Info($"Generating satellite radar frames...");
+                    if (rdi.ParsedData.seriesInfo != null)
+                    {
+                        if (rdi.ParsedData.seriesInfo.sat != null)
+                        {
+                            if (rdi.ParsedData.seriesInfo.sat.series != null)
+                            {
+                                taskList.Add(new RadarProcess().Run(radarConfig.SatRadDef, rdi.ParsedData.seriesInfo.sat.series.Select(ts => ts.ts).ToArray(), sender, "sat"));
+                            } else {
+                                Log.Warning("No satrad timestamps.");
+                                Log.Debug("No series!");
+                            }
+                        } else {
+                            Log.Warning("No satrad timestamps.");
+                            Log.Debug("No sat!");
+                        }
+                    } else {
+                        Log.Warning("No satrad timestamps.");
+                        Log.Debug("No seriesInfo!");
+                    }
+                }
+            } else {
+                Log.Warning("No radar/satrad timestamps.");
+            }
+
+            await Task.WhenAll(taskList);
+            
+
+            string nextTimestamp = DateTime.Now.AddSeconds(generationInterval).ToString("h:mm tt");
+            
+            watch.Stop();
+            Log.Info($"Generated radar/satrad in {watch.ElapsedMilliseconds} ms.");
+            Log.Info($"Next record generation will be at {nextTimestamp}");
+            
+
         }
     }
 }
