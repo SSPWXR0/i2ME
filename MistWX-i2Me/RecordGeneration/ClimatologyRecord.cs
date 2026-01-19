@@ -19,13 +19,27 @@ public class ClimatologyRecord : I2Record
         {
             ClimatologyRecordResponse cliRecRes = new ClimatologyRecordResponse();
             List<ClimatologyRec> cliRecList = new List<ClimatologyRec>();
-            cliRecRes.Key = result.Location.cliStn;
+            if (result.Location.cliStn != null)
+            {
+                cliRecRes.Key = result.Location.cliStn;
+            } else
+            {
+                cliRecRes.Key = "0";
+                Log.Warning($"{result.Location.locId} doesn't have a cliStn!");
+            }
             cliRecRes.ClimoRec = cliRecList;
 
             for (var i = 0; i < result.ParsedData.almanacInterval.Count(); i++)
             {
                 ClimatologyRec cliRec = new ClimatologyRec();
-                cliRec.Loc = result.Location.cliStn;
+                if (result.Location.cliStn != null)
+                {
+                    cliRec.Loc = result.Location.cliStn;
+                } else
+                {
+                    cliRec.Loc = "0";
+                }
+                
                 if (result.ParsedData.temperatureAverageMax != null)
                 {
                     if (result.ParsedData.temperatureAverageMax[i] != null)
@@ -82,7 +96,14 @@ public class ClimatologyRecord : I2Record
                 if (i == result.ParsedData.almanacInterval.Count() - 1)
                 {
                     ClimatologyRec todayCliRec = new ClimatologyRec();
-                    todayCliRec.Loc = result.Location.cliStn;
+                    if (result.Location.cliStn != null)
+                    {
+                        todayCliRec.Loc = result.Location.cliStn;
+                    } else
+                    {
+                        todayCliRec.Loc = "0";
+                    }
+                    
                     todayCliRec.AvgHigh = cliRec.AvgHigh;
                     todayCliRec.AvgLow = cliRec.AvgLow;
                     todayCliRec.RecHigh = cliRec.RecHigh;
