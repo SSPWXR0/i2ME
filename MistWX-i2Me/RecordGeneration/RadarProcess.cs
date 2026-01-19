@@ -188,16 +188,22 @@ public class RadarProcess
             }
         }
 
-        Dictionary<int, List<Task<Image>>> images = new();
+        Dictionary<int, Task<Image[]>> images = new();
         // Grab all images
         foreach (int ts in timestamps)
         {
-            images[ts] = new List<Task<Image>>();
+            List<Task<Image>> tileTaskList = new();
             foreach (Point<int> coords in combinedCoords)
             {
                 Log.Debug($"Added new request to download frame for timestamp {ts}");
-                images[ts].Add(new RadarTileProduct(ts, coords.X, coords.Y, radar_product).Populate());
+                tileTaskList.Add(new RadarTileProduct(ts, coords.X, coords.Y, radar_product).Populate());
             }
+            images[ts] = Task.WhenAll(tileTaskList); 
+        }
+        Dictionary<int, Image[]> actualImages = new();
+        foreach ((int ts, Task<Image[]> imageTask) in images)
+        {
+            actualImages[ts] = await imageTask;
         }
         Log.Debug("Sent requests to grab all images");
 
@@ -214,7 +220,7 @@ public class RadarProcess
         // List of radar generation tasks.
         List<Task> taskList = new();
 
-        foreach ((int ts, List<Task<Image>> imageList) in images)
+        foreach ((int ts, Image[] imageList) in actualImages)
         {
             taskList.Add(ProcessRadarFrame(imageList, radarFrames[ts], combinedCoords.ToArray(), ts, new Point<int>(bounds.XStart, bounds.XEnd), mapTypeDirPath, sender, radar_type));
             Log.Debug($"Added task to process radar frame {ts}");
@@ -224,7 +230,7 @@ public class RadarProcess
         Log.Debug("Awaited all tasks");
     }
 
-    public static async Task ProcessRadarFrame(List<Task<Image>> imgs, Image frame, Point<int>[] coords, int ts, Point<int> tileStart, string dir_path, UdpSender sender, string radar_type)
+    public static async Task ProcessRadarFrame(Image[] imgs, Image frame, Point<int>[] coords, int ts, Point<int> tileStart, string dir_path, UdpSender sender, string radar_type)
     {
         Log.Debug($"Processing frame {ts}");
 
@@ -232,10 +238,7 @@ public class RadarProcess
         int[] xSet = coords.Select(p => Math.Abs((p.X - tileStart.X) * 256)).ToArray();
         int[] ySet = coords.Select(p => Math.Abs((p.Y - tileStart.Y) * 256)).ToArray();
 
-        // Await all images.
-        Image[] alltiles = await Task.WhenAll(imgs);
-
-        frame = frame.Composite(alltiles, new Enums.BlendMode[]{Enums.BlendMode.Add}, xSet, ySet).Flatten();
+        frame = frame.Composite(imgs, new Enums.BlendMode[]{Enums.BlendMode.Add}, xSet, ySet).Flatten();
         Log.Debug($"Frame {ts} stitched");
         // Frame recolor
         frame = PaletteConvert(frame);
