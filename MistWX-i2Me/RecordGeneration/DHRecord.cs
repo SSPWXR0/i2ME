@@ -21,9 +21,21 @@ public class DHRecord : I2Record
             dHRecRes.DHRecordData = dhRecordDataList;
 
             DHRecordHeader dHRecHdr = new DHRecordHeader();
-            dHRecHdr.CoopId = result.Location.coopId;
+            if (result.Location.coopId != null)
+            {
+                dHRecHdr.CoopId = result.Location.coopId;
+            } else
+            {
+                dHRecHdr.CoopId = "0";
+                Log.Warning($"Location {result.Location.locId} has no coopId!");
+            }
+            
             dHRecHdr.ILevel = 2;
-            dHRecHdr.StnNm = result.Location.prsntNm;
+            if (result.Location.prsntNm != null)
+            {
+                dHRecHdr.StnNm = result.Location.prsntNm;
+            }
+            
             dHRecHdr.ProcTm = System.DateTime.Now.ToString("yyyyMMddHHmmss");
 
             foreach (var fcst in result.ParsedData.Forecasts.Forecast)
@@ -54,7 +66,11 @@ public class DHRecord : I2Record
                 dHRecData.WindSpeedKnots = Convert.ToInt32(fcst.Wspd * 0.868976);
                 dHRecData.windDir = fcst.Wdir;
                 dHRecData.windDirCardinal = fcst.WdirCardinal;
-                dHRecData.heatIndexF = fcst.Hi.Value;
+                if (fcst.Hi != null)
+                {
+                    dHRecData.heatIndexF = fcst.Hi.Value;
+                }
+                
                 dHRecData.heatIndexC = Convert.ToInt32((fcst.Hi - 32) / 1.8);
                 dHRecData.windChillF = fcst.Wc;
                 dHRecData.windChillC = Convert.ToInt32((fcst.Wc - 32) / 1.8);
@@ -65,8 +81,14 @@ public class DHRecord : I2Record
                 dHRecData.dewPointC = Convert.ToInt32((fcst.Dewpt - 32) / 1.8);
                 dHRecData.uvIndex = fcst.UvIndex;
                 dHRecData.uvIndexRaw = fcst.UvIndexRaw;
-                dHRecData.GolfIndex = fcst.GolfIndex;
-                dHRecData.GolfCategory = fcst.GolfCategory;
+                if (fcst.GolfIndex != null)
+                {
+                    dHRecData.GolfIndex = fcst.GolfIndex;
+                }
+                if (fcst.GolfCategory != null)
+                {
+                    dHRecData.GolfCategory = fcst.GolfCategory;
+                }
                 dHRecData.PrecipType = fcst.PrecipType;
                 // Day/Night not provided
                 if (DateTime.Now.Hour >= 18)
