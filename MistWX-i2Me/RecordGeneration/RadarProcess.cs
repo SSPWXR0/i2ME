@@ -58,14 +58,18 @@ public class RadarProcess
         {
             Directory.CreateDirectory(mapDirPath);
             Log.Debug("Map dir doesn't exist");
-            if (!Directory.Exists(mapTypeDirPath))
-            {
-                Log.Debug("Map type dir doesn't exist");
-                Directory.CreateDirectory(mapTypeDirPath);
-            }
+            
         } else
         {
-            Log.Debug("Passed directory checks!");
+            Log.Debug("Passed map directory checks!");
+        }
+        if (!Directory.Exists(mapTypeDirPath))
+        {
+            Log.Debug("Map type dir doesn't exist");
+            Directory.CreateDirectory(mapTypeDirPath);
+        }else
+        {
+            Log.Debug("Passed map type directory checks!");
         }
 
         DirectoryInfo mapTypeDir = new(mapTypeDirPath);
