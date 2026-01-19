@@ -262,41 +262,53 @@ public class Program
 
         if (mpc != null)
         {
-            foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
+            if (mpc.ConfigDef != null)
             {
-                if (configLocationKeys.Contains(i.Key))
+                if (mpc.ConfigDef.ConfigItems != null)
                 {
-                    Log.Debug($"{i.Key}: {i.Value}");
-                    if (string.IsNullOrEmpty(i.Value.ToString()))
+                    if (mpc.ConfigDef.ConfigItems.ConfigItem != null)
                     {
-                        continue;
-                    }
-                    try
-                    {
-                        if (Regex.IsMatch(i.Value.ToString(), @"^\d\d\d\d\d(?:,\d\d\d\d\d)*$")) {
-                            string[] choppedValues = i.Value.ToString().Split(",");
-                            locations.Add(choppedValues);
-                        }
-                        else
+                        foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
                         {
-                            string[] choppedValues = i.Value.ToString().Split("_");
+                            if (i.Key != null)
+                            {
+                                if (configLocationKeys.Contains(i.Key))
+                                {
+                                    Log.Debug($"{i.Key}: {i.Value}");
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        if (Regex.IsMatch(i.Value.ToString(), @"^\d\d\d\d\d(?:,\d\d\d\d\d)*$")) {
+                                            string[] choppedValues = i.Value.ToString().Split(",");
+                                            locations.Add(choppedValues);
+                                        }
+                                        else
+                                        {
+                                            string[] choppedValues = i.Value.ToString().Split("_");
 
-                        // Avoid duplicate locations from being added to the location list
-                        if (locations.Contains(choppedValues.GetValue(2)))
-                        {
-                            continue;
-                        }
-                            locations.Add(choppedValues);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Debug($"Failed to configure locations for {i.Key}");
-                        Log.Debug(ex.Message);
-                        // Print stacktrace to the debug console if applicable
-                        if (!string.IsNullOrEmpty(ex.StackTrace))
-                        {
-                            Log.Debug(ex.StackTrace);
+                                        // Avoid duplicate locations from being added to the location list
+                                        if (locations.Contains(choppedValues.GetValue(2)))
+                                        {
+                                            continue;
+                                        }
+                                            locations.Add(choppedValues);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -552,30 +564,35 @@ public class Program
 
                 if (airport != null)
                 {
-                    if (airport.ParsedData.location.iataCode != null)
+                    if (airport.ParsedData.location != null)
                     {
-                        foreach (string? apId in airport.ParsedData.location.iataCode)
+                        if (airport.ParsedData.location.iataCode != null)
                         {
-                            if (apId != null)
+                            foreach (string? apId in airport.ParsedData.location.iataCode)
                             {
-                                tempLF.arptId = apId;
-                                break;
+                                if (apId != null)
+                                {
+                                    tempLF.arptId = apId;
+                                    break;
+                                }
                             }
                         }
                     }
-                
                 }
 
                 if (ski != null)
                 {
-                    if (ski.ParsedData.location.skiId != null)
+                    if (ski.ParsedData.location != null)
                     {
-                        foreach (string? skiId in ski.ParsedData.location.skiId)
+                        if (ski.ParsedData.location.skiId != null)
                         {
-                            if (skiId != null)
+                            foreach (string? skiId in ski.ParsedData.location.skiId)
                             {
-                                tempLF.skiId = skiId;
-                                break;
+                                if (skiId != null)
+                                {
+                                    tempLF.skiId = skiId;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -584,32 +601,44 @@ public class Program
                 if (obs != null)
                 {
                     int obsIdx = 0;
-                    foreach (string? obsId in obs.ParsedData.location.stationId)
+                    if (obs.ParsedData.location != null)
                     {
-                        if (obsId != null)
+                        if (obs.ParsedData.location.stationId != null)
                         {
-                            if (obsIdx == 0)
+                            foreach (string? obsId in obs.ParsedData.location.stationId)
                             {
-                                tempLF.obsStn = obsId;
-                                tempLF.idxId = obsId;
-                            } else if (obsIdx == 1)
-                            {
-                                tempLF.secObsStn = obsId;
-                            } else if (obsIdx == 2)
-                            {
-                                tempLF.tertObsStn = obsId;
-                            } else
-                            {
-                                break;
+                                if (obs.ParsedData.location != null)
+                                {
+                                if (obsId != null)
+                                    {
+                                        if (obsIdx == 0)
+                                        {
+                                            tempLF.obsStn = obsId;
+                                            tempLF.idxId = obsId;
+                                        } else if (obsIdx == 1)
+                                        {
+                                            tempLF.secObsStn = obsId;
+                                        } else if (obsIdx == 2)
+                                        {
+                                            tempLF.tertObsStn = obsId;
+                                        } else
+                                        {
+                                            break;
+                                        }
+                                        obsIdx += 1;
+                                    } 
+                                }
                             }
-                            obsIdx += 1;
                         }
                     }
                 }
 
                 if (al != null)
                 {
-                    tempLF.cliStn = al.ParsedData.stationId.First();
+                    if (al.ParsedData.stationId != null)
+                    {
+                        tempLF.cliStn = al.ParsedData.stationId.First();
+                    }
                 }
 
                 if (cc != null)

@@ -16,31 +16,39 @@ public class TIRecord : I2Record
 
         foreach (var result in results)
         {
-            TIRecordResponse dHRecRes = new TIRecordResponse();
-            List<TIRecordData> dhRecordDataList = new List<TIRecordData>();
+            TIRecordResponse dHRecRes = new()
+            {
+                TIRecordHeader = new TIRecordHeader()
+                {
+                    TIstnId = result.Location.tideId,
+                    ILevel = 2,
+                    ProcTm = System.DateTime.Now.ToString("yyyyMMddHHmmss")
+                }
+            };
+            List<TIRecordData> dhRecordDataList = new();
             dHRecRes.TIRecordData = dhRecordDataList;
 
-            TIRecordHeader dHRecHdr = new TIRecordHeader();
-            dHRecHdr.TIstnId = result.Location.tideId;
-            dHRecHdr.ILevel = 2;
-            dHRecHdr.ProcTm = System.DateTime.Now.ToString("yyyyMMddHHmmss");
-
-            dHRecRes.TIRecordHeader = dHRecHdr;
-
-            foreach (var fcst in result.ParsedData.Tides.Tide)
+            if (result.ParsedData.Tides != null)
             {
-                TIRecordData dHRecData = new TIRecordData();
-                DateTime time = DateTime.Parse(fcst.TideTM, null, System.Globalization.DateTimeStyles.RoundtripKind);
-                dHRecData.TItdTm = time.ToString("MM/dd/yyyy HH:mm:ss");
-                dHRecData.TItdHght = fcst.TideHt;
-                dHRecData.TItdTyp = fcst.TideType;
-                // wtf is with HourlyForecast schema
-                dhRecordDataList.Add(dHRecData);
+                if (result.ParsedData.Tides.Tide != null)
+                {
+                    foreach (var fcst in result.ParsedData.Tides.Tide)
+                    {
+                        TIRecordData dHRecData = new TIRecordData();
+                        DateTime time = DateTime.Parse(fcst.TideTM ?? "", null, System.Globalization.DateTimeStyles.RoundtripKind);
+                        dHRecData.TItdTm = time.ToString("MM/dd/yyyy HH:mm:ss");
+                        dHRecData.TItdHght = fcst.TideHt;
+                        dHRecData.TItdTyp = fcst.TideType;
+                        // wtf is with HourlyForecast schema
+                        dhRecordDataList.Add(dHRecData);
+                    }
+                }
             }
             
+            
 
-            XmlSerializer serializer = new XmlSerializer(typeof(TIRecordResponse));
-            StringWriter sw = new StringWriter();
+            XmlSerializer serializer = new(typeof(TIRecordResponse));
+            StringWriter sw = new();
             XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
             {
                 OmitXmlDeclaration = true,
