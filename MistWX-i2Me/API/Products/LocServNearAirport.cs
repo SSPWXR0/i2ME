@@ -17,7 +17,7 @@ public class LocServNearAirportProduct : Base
         return await GetJsonData<LocServNearAirportResponse>(locations);
     }
 
-    public async Task<GenericResponse<LocServNearAirportResponse>> Receive(LFRecordLocation locations)
+    public async Task<GenericResponse<LocServNearAirportResponse>?> Receive(LFRecordLocation locations)
     {
         return await GetJsonDataLFR<LocServNearAirportResponse>(locations);
     }
