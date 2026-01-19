@@ -46,9 +46,11 @@ public class Program
             Log.Info("Custom directory not made, making right now");
             Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom"));
             Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Mapping"));
+            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Config"));
 
             File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","LFRecord.db"),Path.Combine(AppContext.BaseDirectory, "Custom","LFRecord.db"));
             File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","Mapping","HolidayMapping.xml"),Path.Combine(AppContext.BaseDirectory, "Custom","Mapping","HolidayMapping.xml"));
+            File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","Config","ImageSequenceDefs.xml"),Path.Combine(AppContext.BaseDirectory, "Custom","Config","ImageSequenceDefs.xml"));
         }
 
         UdpSender routineSender = new UdpSender(config.UnitConfig.I2MsgAddress, config.UnitConfig.RoutineMsgPort,
@@ -184,8 +186,8 @@ public class Program
         }
 
         
-        Task checkAlerts = TimedTasks.CheckForAlerts(locations, prioritySender, config.DConfig.RecordGenTimeSeconds);
-        Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.AConfig.CheckAlertTimeSeconds);
+        Task checkAlerts = TimedTasks.CheckForAlerts(locations, prioritySender, config.AConfig.CheckAlertTimeSeconds);
+        Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.DConfig.RecordGenTimeSeconds);
         Task radarTask = TimedTasks.RadarTask(prioritySender, config.RadarConfiguration.RadarInt);
         Task clearAlertsCache = TimedTasks.ClearExpiredAlerts();
         

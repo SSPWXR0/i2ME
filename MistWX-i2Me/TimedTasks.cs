@@ -271,6 +271,7 @@ public class TimedTasks
         
         while (true)
         {
+            await Task.Delay(generationInterval * 1000);
             watch.Restart();
             
             List<Task> taskList = new();
@@ -292,7 +293,7 @@ public class TimedTasks
                         {
                             if (rdi.ParsedData.seriesInfo.twcRadarMosaic.series != null)
                             {
-                                taskList.Add(new RadarProcess().Run(radarConfig.RadarDef, rdi.ParsedData.seriesInfo.twcRadarMosaic.series.Select(ts => ts.ts).ToArray(), sender));
+                                taskList.Add(new RadarProcess().Run(radarConfig.RadarDef, rdi.ParsedData.seriesInfo.twcRadarMosaic.series.Select(ts => ts.ts).ToArray(), sender, "twcRadarMosaic"));
                             } else {
                                 Log.Warning("No radar timestamps.");
                                 Log.Debug("No series!");
@@ -315,7 +316,7 @@ public class TimedTasks
                         {
                             if (rdi.ParsedData.seriesInfo.sat.series != null)
                             {
-                                taskList.Add(new RadarProcess().Run(radarConfig.SatRadDef, rdi.ParsedData.seriesInfo.sat.series.Select(ts => ts.ts).ToArray(), sender));
+                                taskList.Add(new RadarProcess().Run(radarConfig.SatRadDef, rdi.ParsedData.seriesInfo.sat.series.Select(ts => ts.ts).ToArray(), sender, "sat"));
                             } else {
                                 Log.Warning("No satrad timestamps.");
                                 Log.Debug("No series!");
@@ -342,8 +343,6 @@ public class TimedTasks
             
             Log.Info($"Generated radar/satrad in {watch.ElapsedMilliseconds} ms.");
             Log.Info($"Next record generation will be at {nextTimestamp}");
-            
-            await Task.Delay(generationInterval * 1000);
         }
     }
 }

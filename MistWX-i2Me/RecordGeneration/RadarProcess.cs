@@ -10,6 +10,11 @@ using System.Threading;
 using System.Xml.Xsl;
 using MistWX_i2Me.Communication;
 using Dapper;
+using System.Diagnostics;
+using System.Xml.Serialization;
+using MistWX_i2Me.Schema.twc;
+using MistWX_i2Me.Schema.System;
+using System.ComponentModel.DataAnnotations;
 namespace MistWX_i2Me.RecordGeneration;
 
 public class Point<T>
@@ -22,42 +27,7 @@ public class Point<T>
     public T X { get; set; }
     public T Y { get; set; }
 }
-public class ImageBoundaries
-{
-    public float LowerLeftLong { get; set; }
-    public float LowerLeftLat { get; set; }
-    public float UpperRightLong { get; set; }
-    public float UpperRightLat { get; set; }
-    public float VerticalAdjustment { get; set; }
-    public int OriginalImageWidth { get; set; }
-    public int OriginalImageHeight { get; set; }
-    public int MaxImages { get; set; }
-    public int Gap { get; set; }
-    public int ImagesInterval { get; set; }
-    public int Expiration { get; set; }
-    public int DeletePadding { get; set; }
-    public string? FileNameDateFormat { get; set; }
 
-    public Point<float> GrabUpperRight()
-    {
-        return new Point<float>(UpperRightLat, LowerLeftLong);
-    }
-
-    public Point<float> GrabUpperLeft()
-    {
-        return new Point<float>(LowerLeftLat, UpperRightLong);
-    }
-
-    public Point<float> GrabLowerRight()
-    {
-        return new Point<float>(UpperRightLat, LowerLeftLong);
-    }
-
-    public Point<float> GrabLowerLeft()
-    {
-        return new Point<float>(LowerLeftLat, LowerLeftLong);
-    }
-}
 public class TileImageBounds
 {
     public int UpperLeftX { get; set; }
@@ -75,9 +45,10 @@ public class TileImageBounds
 }
 public class RadarProcess
 {
-    public async Task Run(string radar_type, int[] timestamps, UdpSender sender)
+    public async Task Run(string radar_type, int[] timestamps, UdpSender sender, string radar_product)
     {
         Log.Info("Creating radar frames...");
+
 
         // check if maps exist
         string mapDirPath = Path.Combine(AppContext.BaseDirectory, "temp", "maps");
@@ -86,46 +57,86 @@ public class RadarProcess
         if (!Directory.Exists(mapDirPath))
         {
             Directory.CreateDirectory(mapDirPath);
+            Log.Debug("Map dir doesn't exist");
             if (!Directory.Exists(mapTypeDirPath))
             {
+                Log.Debug("Map type dir doesn't exist");
                 Directory.CreateDirectory(mapTypeDirPath);
             }
+        } else
+        {
+            Log.Debug("Passed directory checks!");
         }
 
-        List<Point<int>> combinedCoords = new List<Point<int>>();
+        DirectoryInfo mapTypeDir = new DirectoryInfo(mapTypeDirPath);
+        
+        // Delete all frames from the maptype.
+        foreach(System.IO.FileInfo file in mapTypeDir.GetFiles()) file.Delete();
+        foreach(System.IO.DirectoryInfo subDirectory in mapTypeDir.GetDirectories()) subDirectory.Delete(true);
+        
 
-        ImageBoundaries boundaries = BoundariesFromJSON(radar_type);
+        ImageSequenceDef boundaries = BoundariesFromJSON(radar_type);
+        Log.Debug("Imported boundaries from JSON");
         Point<float> upperRight = boundaries.GrabUpperRight();
         Point<float> lowerLeft = boundaries.GrabLowerLeft();
         Point<float> upperLeft = boundaries.GrabUpperLeft();
         Point<float> lowerRight = boundaries.GrabLowerRight();
 
-        TileImageBounds tileImgBounds = CalculateBounds(upperRight, lowerLeft, upperLeft, lowerRight);
+        // slice timestamps
+        timestamps = new ArraySegment<int>(timestamps, 0, boundaries.MaxImages - 1).ToArray();
+        List<int> tempTses = new();
+
+        foreach (int ts in timestamps)
+        {
+            if (ts % boundaries.ImagesInterval != 0)
+            {
+                Log.Debug($"Ignoring {ts}, not at correct frame interval");
+                continue;
+            }
+
+            if (ts < ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds() - (boundaries.Expiration)) 
+            {
+                Log.Debug($"Ignoring {ts}, expired");
+            }
+            tempTses.Add(ts);
+            
+        }
+        timestamps = tempTses.ToArray();
+        // Calculate bounds
+        TileImageBounds bounds = CalculateBounds(upperRight,upperLeft,lowerLeft,lowerRight);
 
         // Calculate frame tile coords.
-        foreach (int y in Enumerable.Range(tileImgBounds.YStart, tileImgBounds.YEnd)) {
-            if (y <= tileImgBounds.YEnd)
-            {
-                foreach (int x in Enumerable.Range(tileImgBounds.XStart, tileImgBounds.XEnd))
+        Log.Debug("Calculating frame tile coordinates");
+
+        List<Point<int>> combinedCoords = new();
+
+        //throw new Exception($"YStart: {bounds.YStart}, YEnd: {bounds.YEnd}, XStart: {bounds.XStart}, XEnd: {bounds.XEnd}");
+
+        foreach (int y in Enumerable.Range(bounds.YStart, bounds.YEnd))
+        {
+            if (y <= bounds.YEnd) {
+                foreach (int x in Enumerable.Range(bounds.XStart, bounds.XEnd))
                 {
-                    if (x <= tileImgBounds.XEnd)
+                    if (x  <= bounds.XEnd)
                     {
                         combinedCoords.Add(new Point<int>(x, y));
                     }
                 }
             }
-
         }
 
         Dictionary<int, List<Task<Image>>> images = new();
         // Grab all images
         foreach (int ts in timestamps)
         {
+            images[ts] = new List<Task<Image>>();
             foreach (Point<int> coords in combinedCoords)
             {
-                images[ts].Add(new RadarTileProduct(ts, coords.X, coords.Y, radar_type).Populate());
+                Log.Debug($"Added new request to download frame for timestamp {ts}");
+                images[ts].Add(new RadarTileProduct(ts, coords.X, coords.Y, radar_product).Populate());
             }
         }
+        Log.Debug("Sent requests to grab all images");
 
         // List of radar frames.
         Dictionary<int, Image> radarFrames = new();
@@ -133,7 +144,8 @@ public class RadarProcess
         // Generate all radar frames.
         foreach (int ts in timestamps)
         {
-            radarFrames[ts] = Image.Black(tileImgBounds.ImageWidth, tileImgBounds.ImageHeight);
+            radarFrames[ts] = Image.Black(Math.Abs(bounds.ImageWidth), Math.Abs(bounds.ImageHeight));
+            Log.Debug($"Generated new frame for {ts}");
         }
 
         // List of radar generation tasks.
@@ -141,30 +153,39 @@ public class RadarProcess
 
         foreach ((int ts, List<Task<Image>> imageList) in images)
         {
-            taskList.Add(ProcessRadarFrame(await Task.WhenAll(imageList), radarFrames[ts], combinedCoords.ToArray(), ts, tileImgBounds, mapTypeDirPath, sender, radar_type));
+            taskList.Add(ProcessRadarFrame(await Task.WhenAll(imageList), radarFrames[ts], combinedCoords.ToArray(), ts, new Point<int>(bounds.XStart, bounds.XEnd), mapTypeDirPath, sender, radar_type));
+            Log.Debug($"Added task to process radar frame {ts}");
         }
 
         await Task.WhenAll(taskList);
+        Log.Debug("Awaited all tasks");
     }
 
-    public static async Task ProcessRadarFrame(Image[] imgs, Image frame, Point<int>[] coords, int ts, TileImageBounds tileImgBounds, string dir_path, UdpSender sender, string radar_type)
+    public static async Task ProcessRadarFrame(Image[] imgs, Image frame, Point<int>[] coords, int ts, Point<int> tileStart, string dir_path, UdpSender sender, string radar_type)
     {
+        Log.Debug($"Processing frame {ts}");
+
         // Composite all tiles to frame.
-        int[] xSet = coords.Select(p => (p.X - tileImgBounds.XStart) * 256).ToArray();
-        int[] ySet = coords.Select(p => (p.Y - tileImgBounds.YStart) * 256).ToArray();
-        frame.Composite(imgs, Enumerable.Repeat(Enums.BlendMode.Clear, imgs.Length).ToArray(), x: xSet, y: ySet);
+        int[] xSet = coords.Select(p => Math.Abs((p.X - tileStart.X) * 256)).ToArray();
+        int[] ySet = coords.Select(p => Math.Abs((p.Y - tileStart.Y) * 256)).ToArray();
+
+        frame = frame.Composite(imgs, new Enums.BlendMode[]{Enums.BlendMode.Add}, xSet, ySet).Flatten();
+        Log.Debug($"Frame {ts} stitched");
         // Frame recolor
         frame = PaletteConvert(frame);
+        Log.Debug($"Frame {ts} recolored");
         
         // Save frame.
         string framePath = Path.Combine(dir_path, $"{ts}.tiff");
         frame.WriteToFile(framePath);
+        Log.Debug($"Frame {ts} saved to {framePath}");
 
         // Split radar type.
         string[] splitRadarType = radar_type.Split("-");
 
         // Send command to i2 to ingest radar frame.
         sender.SendFile(framePath, $"storePriorityImage(FileExtension=.tiff, Location={splitRadarType[1]},ImageType={splitRadarType[0]},IssueTime={ts})");
+        Log.Debug($"Frame {ts} sent");
     }
 
     public static Image PaletteConvert(Image img)
@@ -219,69 +240,138 @@ public class RadarProcess
 
         return img;
     }
-    public static Point<int> WorldCoordToTile(Point<float> coord)
+
+    public static Point<float> LatLongProject(Point<float> point)
+    {
+        double sin_y = Math.Sin(point.X * Math.PI / 180);
+        sin_y = Math.Min(Math.Max(sin_y, -0.9999), 0.9999);
+        float x = (float)(256 * (0.5 + point.Y / 360));
+        float y = (float)(256 * (0.5 - Math.Log((1 + sin_y) / (1 - sin_y)) / (4 * Math.PI)));
+
+        return new Point<float>(x, y);
+    }
+    
+    public static Point<int> LongLatToTile(Point<float> longlat)
+    {
+        int scale = 1 << 6;
+        Point<float> coords = LatLongProject(longlat);
+
+        return new Point<int>(
+            (int)Math.Floor(coords.X * scale / 255),
+            (int)Math.Floor(coords.Y * scale / 255)
+        );
+    }
+
+    public static Point<int> CoordToTile(Point<float> longlat)
     {
         int scale = 1 << 6;
 
-        return new Point<int>((int)Math.Floor(coord.X * scale / 255), (int)Math.Floor(coord.Y * scale / 255));
+        return new Point<int>(
+            (int)Math.Floor(longlat.X * scale / 256),
+            (int)Math.Floor(longlat.Y * scale / 256)
+        );
     }
-    public static Point<int> WorldCoordToPixel(Point<float> coord)
+
+    public static Point<int> CoordToPixel(Point<float> longlat)
     {
         int scale = 1 << 6;
 
-        return new Point<int>((int)Math.Floor(coord.X * scale), (int)Math.Floor(coord.Y * scale));
+        return new Point<int>(
+            (int)Math.Floor(longlat.X * scale),
+            (int)Math.Floor(longlat.Y * scale)
+        );
     }
-    public static Point<float> LatLongProject(float lat, float lon)
-    {
-        double sin_y = Math.Min(Math.Max(Math.Sin(lat * Math.PI / 180), -0.9999), 0.9999);
 
-        return new Point<float>((float)(256 * (0.5 + lon / 360)), (float)(256 * (0.5 - Math.Log(1 + sin_y) / (1- sin_y) / (4*Math.PI))));
+    class TileImageBounds
+    {
+        public int UpperLeftX { get; set; }
+        public int UpperLeftY { get; set; }
+        public int LowerRightX { get; set; }
+        public int LowerRightY { get; set; }
+        public int XStart { get; set; }
+        public int XEnd { get; set; }
+        public int YStart { get; set; }
+        public int YEnd { get; set; }
+        public int XTiles { get; set; }
+        public int YTiles { get; set; }
+        public int ImageWidth { get; set; }
+        public int ImageHeight { get; set; }
     }
-    public static TileImageBounds CalculateBounds(Point<float> upper_right, Point<float> lower_left, Point<float> upper_left, Point<float> lower_right)
+
+    static TileImageBounds CalculateBounds(Point<float> upper_right, Point<float> upper_left, Point<float> lower_left, Point<float> lower_right)
     {
-        TileImageBounds bounds = new TileImageBounds();
-        Point<int> UpperRightTile = WorldCoordToTile(LatLongProject(upper_right.X, upper_right.Y));
-        Point<int> LowerRightTile = WorldCoordToTile(LatLongProject(lower_right.X, lower_right.Y));
-        Point<int> UpperLeftTile = WorldCoordToTile(LatLongProject(upper_left.X, upper_left.Y));
-        Point<int> LowerLeftTile = WorldCoordToTile(LatLongProject(lower_left.X, lower_right.Y));
+        Point<int> UpperRightTile = CoordToTile(LatLongProject(upper_right));
+        Point<int> UpperLeftTile = CoordToTile(LatLongProject(upper_left));
+        Point<int> LowerRightTile = CoordToTile(LatLongProject(lower_right));
+        Point<int> LowerLeftTile = CoordToTile(LatLongProject(lower_left));
 
-        Point<int> UpperLeftPixels = WorldCoordToPixel(LatLongProject(upper_left.X, upper_left.Y));
-        Point<int> LowerRightPixels = WorldCoordToPixel(LatLongProject(lower_right.X, lower_right.Y));
+        Point<int> UpperLeftPixels = CoordToPixel(LatLongProject(upper_left));
+        Point<int> LowerRightPixels = CoordToPixel(LatLongProject(lower_right));
 
-        Point<int> UpperLeft = new Point<int>(UpperLeftPixels.X - UpperLeftTile.X * 256, UpperLeftPixels.Y - UpperLeftTile.Y * 256);
-        Point<int> LowerRight = new Point<int>(LowerRightPixels.X - LowerRightTile.X * 256, LowerRightPixels.Y - LowerRightTile.Y * 256);
+        int UpperLeftX = UpperLeftPixels.X - UpperLeftTile.X * 256;
+        int UpperLeftY = UpperLeftPixels.Y - UpperLeftTile.Y * 256;
+        int LowerRightX = LowerRightPixels.X - UpperLeftTile.X * 256;
+        int LowerRightY = LowerRightPixels.Y - UpperLeftTile.Y * 256;
 
-        bounds.UpperLeftX = UpperLeft.X;
-        bounds.UpperLeftY = UpperLeft.Y;
-        bounds.LowerRightX = LowerRight.X;
-        bounds.LowerRightY = LowerRight.Y;
-        bounds.XStart = UpperLeftTile.X;
-        bounds.XEnd = UpperRightTile.X;
-        bounds.YStart = UpperLeftTile.Y;
-        bounds.YEnd = LowerLeftTile.Y;
-        bounds.ImageWidth = 256 * (UpperRightTile.X - UpperLeftTile.X + 1);
-        bounds.ImageHeight = 256 * (LowerLeftTile.Y - UpperLeftTile.Y + 1);
+        int XStart = UpperLeftTile.X;
+        int XEnd = UpperRightTile.X;
+        int YStart = UpperLeftTile.Y;
+        int YEnd = LowerLeftTile.Y;
 
-        return bounds;
+        int XTiles = XEnd - XStart;
+        int YTiles = YEnd - YStart;
+
+        int ImageWidth = 256 * (XTiles + 1);
+        int ImageHeight = 256 * (YTiles + 1);
+
+        TileImageBounds imageBounds = new();
+        imageBounds.UpperLeftX = UpperLeftX;
+        imageBounds.UpperLeftY = UpperLeftY;
+        imageBounds.LowerRightX = LowerRightX;
+        imageBounds.LowerRightY = LowerRightY;
+        imageBounds.XStart = XStart;
+        imageBounds.XEnd = XEnd;
+        imageBounds.YStart = YStart;
+        imageBounds.YEnd = YEnd;
+        imageBounds.XTiles = XTiles;
+        imageBounds.YTiles = YTiles;
+        imageBounds.ImageWidth = ImageWidth;
+        imageBounds.ImageHeight = ImageHeight;
+
+        return imageBounds;
     }
-    public static ImageBoundaries BoundariesFromJSON(string maptype)
-    {
-        StreamReader reader = new StreamReader(Path.Combine(AppContext.BaseDirectory, "Custom", "ImageSequenceDefs.json"));
-        string? json = reader.ToString();
 
-        if (json != null)
+    static ImageSequenceDef BoundariesFromJSON(string maptype)
+    {
+        Log.Debug("Looking for boundaries...");
+        StreamReader reader = new StreamReader(Path.Combine(AppContext.BaseDirectory, "Custom", "Config", "ImageSequenceDefs.xml"));
+        XmlSerializer serializer = new XmlSerializer(typeof(ImageSequenceDefs));
+        ImageSequenceDefs? output = (ImageSequenceDefs?)serializer.Deserialize(reader);
+
+        Log.Debug("Boundaries deserialized.");
+        if (output != null)
         {
-            Dictionary<string, ImageBoundaries>? values = JsonSerializer.Deserialize<Dictionary<string, ImageBoundaries>>(json);
-            if (values != null)
+            if (output.ImageSequenceDef != null)
             {
-                return values[maptype];
+                foreach (ImageSequenceDef imageSequenceDef in output.ImageSequenceDef)
+                {
+                    string tempMT = $"{imageSequenceDef.type}-{imageSequenceDef.area}";
+                    if (maptype == tempMT)
+                    {
+                        return imageSequenceDef;
+                    } 
+                }
+                Log.Warning("Cannot find the ImageSequenceDef!");
+                return new ImageSequenceDef();
+        
             } else {
-                MistWX_i2Me.Log.Warning("There was a problem parsing the ImageSequenceDefs.");
-                return new ImageBoundaries();
+                Log.Warning("ImageSequenceDefs is null!");
+                return new ImageSequenceDef();
             }
+            
         } else {
-            MistWX_i2Me.Log.Warning("ImageSequenceDefs is null!");
-            return new ImageBoundaries();
+            Log.Warning("ImageSequenceDefs is null!");
+            return new ImageSequenceDef();
         }
     }
 }
