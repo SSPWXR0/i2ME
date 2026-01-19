@@ -135,40 +135,50 @@ public class RadarProcess
             
             if (mpc != null)
             {
-                foreach (ConfigItem cfgItm in mpc.ConfigDef.ConfigItems.ConfigItem)
+                if (mpc.ConfigDef != null)
                 {
-                    if (cfgItm.Key == "PrimaryLatitudeLongitude")
+                    if (mpc.ConfigDef.ConfigItems != null)
                     {
-                        Point<double> latlong = new((double)0.0, (double)0.0);
-                        string[] split = cfgItm.Value.Split("-");
-                        string split0Dir = split[0].Substring(0, 1);
-                        string split1Dir = split[1].Substring(0, 1);
+                        if (mpc.ConfigDef.ConfigItems.ConfigItem != null)
+                        {
+                            foreach (ConfigItem cfgItm in mpc.ConfigDef.ConfigItems.ConfigItem)
+                            {
+                                if (cfgItm.Key == "PrimaryLatitudeLongitude")
+                                {
+                                    Point<double> latlong = new((double)0.0, (double)0.0);
+                                    string[] split = (cfgItm.Value ?? "-").Split("-");
+                                    string split0Dir = split[0].Substring(0, 1);
+                                    string split1Dir = split[1].Substring(0, 1);
 
-                        if (split0Dir == "W")
-                        {
-                            latlong.Y = Convert.ToDouble($"-{split[0].Substring(1)}");
-                        } else
-                        {
-                            latlong.Y = Convert.ToDouble(split[0].Substring(1));
+                                    if (split0Dir == "W")
+                                    {
+                                        latlong.Y = Convert.ToDouble($"-{split[0].Substring(1)}");
+                                    } else
+                                    {
+                                        latlong.Y = Convert.ToDouble(split[0].Substring(1));
+                                    }
+
+                                    if (split1Dir == "N")
+                                    {
+                                        latlong.X = Convert.ToDouble(split[1].Substring(1));
+                                    } else
+                                    {
+                                        latlong.X = Convert.ToDouble($"-{split[1].Substring(1)}");
+                                    }
+
+                                    Point<int> tile = LongLatToTile(latlong);
+                                    GrabXStart = tile.X - Config.config.RadarConfiguration.LocalRadarRadius;
+                                    GrabXEnd = tile.X + Config.config.RadarConfiguration.LocalRadarRadius;
+                                    GrabYStart = tile.Y - Config.config.RadarConfiguration.LocalRadarRadius;
+                                    GrabYEnd = tile.Y + Config.config.RadarConfiguration.LocalRadarRadius;
+                                    //throw new Exception($"{GrabXStart} \n {GrabXEnd} \n {GrabYStart} \n {GrabYEnd}");
+                                    break;
+                                } 
+                            }
                         }
-
-                        if (split1Dir == "N")
-                        {
-                            latlong.X = Convert.ToDouble(split[1].Substring(1));
-                        } else
-                        {
-                            latlong.X = Convert.ToDouble($"-{split[1].Substring(1)}");
-                        }
-
-                        Point<int> tile = LongLatToTile(latlong);
-                        GrabXStart = tile.X - Config.config.RadarConfiguration.LocalRadarRadius;
-                        GrabXEnd = tile.X + Config.config.RadarConfiguration.LocalRadarRadius;
-                        GrabYStart = tile.Y - Config.config.RadarConfiguration.LocalRadarRadius;
-                        GrabYEnd = tile.Y + Config.config.RadarConfiguration.LocalRadarRadius;
-                        //throw new Exception($"{GrabXStart} \n {GrabXEnd} \n {GrabYStart} \n {GrabYEnd}");
-                        break;
-                    } 
+                    }
                 }
+                
             } else
             {
                 Log.Warning("Could not read MachineProductCfg!");

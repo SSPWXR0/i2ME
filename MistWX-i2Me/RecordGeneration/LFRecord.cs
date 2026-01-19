@@ -19,61 +19,60 @@ public class LFRecord : I2Record
         string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "LFRecords", $"LFRecord-{result.cntryCd}-{result.locType}-{result.locId}-{result.cityNm}.xml");
         string recordScript = "<Data type=\"LFRecord\">";
 
-        LFRecordResponse LFRecRes = new LFRecordResponse();
-
-        LFRecordHeader LFRecHdr = new LFRecordHeader();
-        LFRecHdr.LocId = result.locId;
-        LFRecHdr.LocType = result.locType;
-        LFRecHdr.ProcTm = System.DateTime.Now.ToString("yyyyMMddHHmmss");
-
-        LFRecRes.LFRecordHeader = LFRecHdr;
-
-        // Set the LFRecord values
-        LFRecordData LFRecData = new LFRecordData();
-        LFRecData.active = result.active;
-        LFRecData.arptId = result.arptId;
-        LFRecData.cityNm = result.cityNm;
-        LFRecData.cliStn = result.cliStn;
-        LFRecData.clsRad = result.clsRad;
-        LFRecData.cntryCd = result.cntryCd;
-        LFRecData.cntyFips = result.cntyFips;
-        LFRecData.cntyId = result.cntyId;
-        LFRecData.cntyNm = result.cntyNm;
-        LFRecData.coopId = result.coopId;
-        LFRecData.dmaCd = result.dmaCd;
-        LFRecData.dySTAct = result.dySTAct;
-        LFRecData.dySTInd = result.dySTInd;
-        LFRecData.elev = result.elev;
-        LFRecData.epaId = result.epaId;
-        LFRecData.gmtDiff = result.gmtDiff;
-        LFRecData.lat = result.lat;
-        LFRecData.lon = result.@long;
-        LFRecData.lsRad = result.lsRad;
-        LFRecData.mrnZoneId = result.mrnZoneId;
-        LFRecData.obsStn = result.obsStn;
-        LFRecData.pllnId = result.pllnId;
-        LFRecData.primTecci = result.primTecci;
-        LFRecData.prsntNm = result.prsntNm;
-        LFRecData.regSat = result.regSat;
-        LFRecData.secObsStn = result.secObsStn;
-        LFRecData.secTecci = result.secTecci;
-        LFRecData.siteId = result.siteId;
-        LFRecData.skiId = result.skiId;
-        LFRecData.ssRad = result.ssRad;
-        LFRecData.stCd = result.stCd;
-        LFRecData.tertObsStn = result.tertObsStn;
-        LFRecData.tertTecci = result.tertTecci;
-        LFRecData.tideId = result.tideId;
-        LFRecData.tmZnNm = result.tmZnNm;
-        LFRecData.tmZnAbbr = result.tmZnAbbr;
-        LFRecData.tPrsntNm = result.tPrsntNm;
-        LFRecData.wmoId = result.wmoId;
-        LFRecData.wrlsPrsntNm = result.wrlsPrsntNm;
-        LFRecData.zip2locId = result.zip2locId;
-        LFRecData.zoneId = result.zoneId;
-        LFRecData.zoneNm = result.cntyNm;
-        
-        LFRecRes.LFRecordData = LFRecData;
+        LFRecordResponse LFRecRes = new()
+        {
+            LFRecordHeader = new LFRecordHeader()
+            {
+                LocId = result.locId,
+                LocType = result.locType,
+                ProcTm = System.DateTime.Now.ToString("yyyyMMddHHmmss")
+            },
+            LFRecordData = new LFRecordData()
+            {
+                active = result.active,
+                arptId = result.arptId,
+                cityNm = result.cityNm,
+                cliStn = result.cliStn,
+                clsRad = result.clsRad,
+                cntryCd = result.cntryCd,
+                cntyFips = result.cntyFips,
+                cntyId = result.cntyId,
+                cntyNm = result.cntyNm,
+                coopId = result.coopId,
+                dmaCd = result.dmaCd,
+                dySTAct = result.dySTAct,
+                dySTInd = result.dySTInd,
+                elev = result.elev,
+                epaId = result.epaId,
+                gmtDiff = result.gmtDiff,
+                lat = result.lat,
+                lon = result.@long,
+                lsRad = result.lsRad,
+                mrnZoneId = result.mrnZoneId,
+                obsStn = result.obsStn,
+                pllnId = result.pllnId,
+                primTecci = result.primTecci,
+                prsntNm = result.prsntNm,
+                regSat = result.regSat,
+                secObsStn = result.secObsStn,
+                secTecci = result.secTecci,
+                siteId = result.siteId,
+                skiId = result.skiId,
+                ssRad = result.ssRad,
+                stCd = result.stCd,
+                tertObsStn = result.tertObsStn,
+                tertTecci = result.tertTecci,
+                tideId = result.tideId,
+                tmZnNm = result.tmZnNm,
+                tmZnAbbr = result.tmZnAbbr,
+                tPrsntNm = result.tPrsntNm,
+                wmoId = result.wmoId,
+                wrlsPrsntNm = result.wrlsPrsntNm,
+                zip2locId = result.zip2locId,
+                zoneId = result.zoneId,
+                zoneNm = result.cntyNm,
+            }
+        };
 
         XmlSerializer serializer = new XmlSerializer(typeof(LFRecordResponse));
         StringWriter sw = new StringWriter();

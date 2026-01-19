@@ -91,18 +91,25 @@ public class DailyForecastRecord : I2Record
             });
             
             // check for potential severe weather qualifiers
-            foreach (Forecast fcst in result.ParsedData.Forecasts.Forecast)
-            {
-                fcst.QualifierCode = QualifierCheck(fcst.SnowQpf,0, fcst.MinTemp, fcst.Qpf);
-                if (fcst.Day != null)
+            if (result.ParsedData.Forecasts != null)
+            {  
+                if (result.ParsedData.Forecasts.Forecast != null)
                 {
-                    fcst.Day.QualifierCode = QualifierCheck(fcst.Day.SnowQpf, fcst.Day.IconCode, fcst.Day.Temp, fcst.Day.Qpf);
-                }
-                if (fcst.Night != null)
-                {
-                    fcst.Night.QualifierCode = QualifierCheck(fcst.Night.SnowQpf, fcst.Night.IconCode, fcst.Night.Temp, fcst.Night.Qpf);
-                }
+                    foreach (Forecast fcst in result.ParsedData.Forecasts.Forecast)
+                    {
+                        fcst.QualifierCode = QualifierCheck(fcst.SnowQpf,0, fcst.MinTemp, fcst.Qpf);
+                        if (fcst.Day != null)
+                        {
+                            fcst.Day.QualifierCode = QualifierCheck(fcst.Day.SnowQpf, fcst.Day.IconCode, fcst.Day.Temp, fcst.Day.Qpf);
+                        }
+                        if (fcst.Night != null)
+                        {
+                            fcst.Night.QualifierCode = QualifierCheck(fcst.Night.SnowQpf, fcst.Night.IconCode, fcst.Night.Temp, fcst.Night.Qpf);
+                        }
+                    }
+                } 
             }
+            
             xw.WriteWhitespace("");
             serializer.Serialize(xw, result.ParsedData);
 

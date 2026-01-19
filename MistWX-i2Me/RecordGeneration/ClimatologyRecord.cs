@@ -17,89 +17,60 @@ public class ClimatologyRecord : I2Record
 
         foreach (var result in results)
         {
-            ClimatologyRecordResponse cliRecRes = new ClimatologyRecordResponse();
-            List<ClimatologyRec> cliRecList = new List<ClimatologyRec>();
-            cliRecRes.Key = result.Location.cliStn;
+            ClimatologyRecordResponse cliRecRes = new();
+            List<ClimatologyRec> cliRecList = new();
+            if (result.Location.cliStn != null)
+            {
+                cliRecRes.Key = result.Location.cliStn;
+            } else
+            {
+                cliRecRes.Key = "0";
+                Log.Warning($"{result.Location.locId} doesn't have a cliStn!");
+            }
             cliRecRes.ClimoRec = cliRecList;
 
-            for (var i = 0; i < result.ParsedData.almanacInterval.Count(); i++)
+            if (result.ParsedData.almanacInterval != null)
             {
-                ClimatologyRec cliRec = new ClimatologyRec();
-                cliRec.Loc = result.Location.cliStn;
-                if (result.ParsedData.temperatureAverageMax != null)
+                for (var i = 0; i < result.ParsedData.almanacInterval.Count; i++)
                 {
-                    if (result.ParsedData.temperatureAverageMax[i] != null)
+                    ClimatologyRec cliRec = new()
                     {
-                        cliRec.AvgHigh = Convert.ToInt32(result.ParsedData.temperatureAverageMax[i]);
-                    }
+                        Loc = result.Location.cliStn ?? "0",
+                        AvgHigh = (result.ParsedData.temperatureAverageMax ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 0,
+                        AvgLow = (result.ParsedData.temperatureAverageMin ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 0,
+                        RecHigh = (result.ParsedData.temperatureRecordMax ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 0,
+                        RecLow = (result.ParsedData.temperatureRecordMin ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 0,
+                        RecHighYear = (result.ParsedData.almanacRecordYearMax ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 2026,
+                        RecLowYear = (result.ParsedData.almanacRecordYearMin ?? Enumerable.Repeat<int?>(null, result.ParsedData.almanacInterval.Count).ToList())[i] ?? 2026,
+                        Year = System.DateTime.Now.Year,
+                        Month = (result.ParsedData.almanacRecordDate ?? Enumerable.Repeat<string>("1220", result.ParsedData.almanacInterval.Count).ToList())[i][..2],
+                        Day = (result.ParsedData.almanacRecordDate ?? Enumerable.Repeat<string>("1220", result.ParsedData.almanacInterval.Count).ToList())[i][3..]
+                    };
                     
-                }
-                if (result.ParsedData.temperatureAverageMin != null)
-                {
-                    if (result.ParsedData.temperatureAverageMin[i] != null)
+                    cliRecList.Add(cliRec);
+                    if (i == result.ParsedData.almanacInterval.Count - 1)
                     {
-                        cliRec.AvgLow = Convert.ToInt32(result.ParsedData.temperatureAverageMin[i]);
-                    }
-                    
-                }
-                if (result.ParsedData.temperatureRecordMax != null)
-                {
-                    if (result.ParsedData.temperatureRecordMax[i] != null)
-                    {
-                        cliRec.RecHigh = Convert.ToInt32(result.ParsedData.temperatureRecordMax[i]);
-                    }
-                    
-                }
-                if (result.ParsedData.temperatureRecordMin != null)
-                {
-                    if (result.ParsedData.temperatureRecordMin[i] != null)
-                    {
-                        cliRec.RecLow = Convert.ToInt32(result.ParsedData.temperatureRecordMin[i]);
-                    }
-                    
-                }
-                if (result.ParsedData.almanacRecordYearMax != null)
-                {
-                    if (result.ParsedData.almanacRecordYearMax[i] != null)
-                    {
-                        cliRec.RecHighYear = Convert.ToInt32(result.ParsedData.almanacRecordYearMax[i]);
-                    }
-                    
-                }
-                if (result.ParsedData.almanacRecordYearMin != null)
-                {
-                    if (result.ParsedData.almanacRecordYearMin[i] != null)
-                    {
-                        cliRec.RecLowYear = Convert.ToInt32(result.ParsedData.almanacRecordYearMin[i]);
-                    }
-                } 
+                        ClimatologyRec todayCliRec = new()
+                        {
+                            Loc = result.Location.cliStn ?? "0",
+                            AvgHigh = cliRec.AvgHigh,
+                            AvgLow = cliRec.AvgLow,
+                            RecHigh = cliRec.RecHigh,
+                            RecHighYear = cliRec.RecHighYear,
+                            RecLow = cliRec.RecLow,
+                            RecLowYear = cliRec.RecLowYear,
+                            Year = System.DateTime.Now.Year,
+                            Month = System.DateTime.Now.ToString("MM"),
+                            Day = System.DateTime.Now.ToString("dd")
+                        };
 
-                cliRec.Year = System.DateTime.Now.Year;
-                cliRec.Month = result.ParsedData.almanacRecordDate[i].Substring(0,2);
-                cliRec.Day = result.ParsedData.almanacRecordDate[i].Substring(2,2);
-
-                cliRecList.Add(cliRec);
-                if (i == result.ParsedData.almanacInterval.Count() - 1)
-                {
-                    ClimatologyRec todayCliRec = new ClimatologyRec();
-                    todayCliRec.Loc = result.Location.cliStn;
-                    todayCliRec.AvgHigh = cliRec.AvgHigh;
-                    todayCliRec.AvgLow = cliRec.AvgLow;
-                    todayCliRec.RecHigh = cliRec.RecHigh;
-                    todayCliRec.RecHighYear = cliRec.RecHighYear;
-                    todayCliRec.RecLow = cliRec.RecLow;
-                    todayCliRec.RecLowYear = cliRec.RecLowYear;
-                    todayCliRec.Year = System.DateTime.Now.Year;
-                    todayCliRec.Month = System.DateTime.Now.ToString("MM");
-                    todayCliRec.Day = System.DateTime.Now.ToString("dd");
-
-                    cliRecList.Add(todayCliRec);
+                        cliRecList.Add(todayCliRec);
+                    }
                 }
             }
             
-
-            XmlSerializer serializer = new XmlSerializer(typeof(ClimatologyRecordResponse));
-            StringWriter sw = new StringWriter();
+            XmlSerializer serializer = new(typeof(ClimatologyRecordResponse));
+            StringWriter sw = new();
             XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
             {
                 OmitXmlDeclaration = true,
