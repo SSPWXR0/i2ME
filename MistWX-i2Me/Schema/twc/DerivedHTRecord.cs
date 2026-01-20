@@ -116,13 +116,13 @@ public class DerivedHTRecordData
     [XmlElement(ElementName = "HTDstnc2")]
     public string? Distance2 { get; set; }
 
-    [XmlElement(ElementName = "HTDir1")]
+    [XmlElement(ElementName = "HTDir2")]
     public string? Direction2 { get; set; }
 
-    [XmlElement(ElementName = "HTLoc1")]
+    [XmlElement(ElementName = "HTLoc2")]
     public string? LocName2 { get; set; }
 
-    [XmlElement(ElementName = "HTCtyNm1")]
+    [XmlElement(ElementName = "HTCtyNm2")]
     public string? CityName2 { get; set; }
 
     [XmlElement(ElementName = "HTBasin")]
