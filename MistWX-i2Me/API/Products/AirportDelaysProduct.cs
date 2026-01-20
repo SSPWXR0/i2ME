@@ -11,8 +11,8 @@ public class AirportDelaysProduct : Base
             "https://nasstatus.faa.gov/api/airport-events";
     }
 
-    public async Task<List<GenericResponse<AirportEventsResponse>>> Populate(string[] locations)
+    public async Task<GenericResponse<List<AirportEvent>>?> Populate()
     {
-        return await GetJsonData<AirportEventsResponse>(locations);
+        return await GetJsonDataLFR<List<AirportEvent>>(new Schema.System.LFRecordLocation());
     }
 }

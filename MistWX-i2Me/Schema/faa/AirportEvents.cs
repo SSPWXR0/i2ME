@@ -6,7 +6,7 @@ public class ArrivalDelay
 {
     public string? impactingCondition { get; set; }
 
-    public int averageDelay { get; set; }
+    public string? averageDelay { get; set; }
 }
 
 public class GroundStop
@@ -18,14 +18,12 @@ public class GroundDelay
 {
     public string? impactingCondition { get; set; }
 
-    public int avgDelay { get; set; }
+    public string? avgDelay { get; set; }
 }
 
 public class FreeForm
 {
-    public string? startTime { get; set; }
-
-    public string? endTime { get; set; }
+    public string? text { get; set; }
 }
 
 public class AirportEvent
@@ -37,6 +35,7 @@ public class AirportEvent
     public GroundDelay? groundDelay { get; set; }
     public FreeForm? freeForm { get; set; }
     public object? airportClosure { get; set; }
+    public string? airportLongName { get; set; }
 }
 public class AirportEventsResponse
 {

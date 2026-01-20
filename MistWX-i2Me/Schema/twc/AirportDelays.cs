@@ -2,46 +2,101 @@ using System.Xml.Serialization;
 
 namespace MistWX_i2Me.Schema.twc;
 
-[XmlRoot(ElementName="Arrival")]
+[XmlRoot(ElementName="arrival")]
 public class Arrival
 {
-    [XmlAttribute(AttributeName="cancellations")]
+    [XmlElement(ElementName="cancellations")]
     public int Cancellations { get; set; }
 
-    [XmlAttribute(AttributeName="percentage_cancelled")]
+    [XmlElement(ElementName="percentage_cancelled")]
     public int PercentCancelled { get; set; }
 
-    [XmlAttribute(AttributeName="total")]
+    [XmlElement(ElementName="total")]
     public int Total { get; set; }
+}
+
+[XmlRoot(ElementName="departure")]
+public class Departure
+{
+    [XmlElement(ElementName="cancellations")]
+    public int Cancellations { get; set; }
+
+    [XmlElement(ElementName="percentage_cancelled")]
+    public int PercentCancelled { get; set; }
+
+    [XmlElement(ElementName="total")]
+    public int Total { get; set; }
+}
+
+[XmlRoot(ElementName="delay")]
+public class Delay
+{
+    [XmlElement(ElementName="category")]
+    public string? Category { get; set; }
+
+    [XmlElement(ElementName="color")]
+    public string? Color { get; set; }
+
+    [XmlElement(ElementName="delay_sec")]
+    public int DelaySec { get; set; }
+
+    [XmlElement(ElementName="reason")]
+    public string Reason = "Other";
+}
+
+[XmlRoot(ElementName="reasons_all")]
+public class ReasonsAll
+{
+    [XmlElement(ElementName="delay")]
+    public List<Delay>? Delay { get; set; }
+}
+
+[XmlRoot(ElementName="delays")]
+public class Delays
+{
+    [XmlElement(ElementName="category")]
+    public string? Category { get; set; }
+
+    [XmlElement(ElementName="color")]
+    public string? Color { get; set; }
+
+    [XmlElement(ElementName="delay_sec")]
+    public int DelaySec { get; set; }
+
+    [XmlElement(ElementName="reasons_all")]
+    public ReasonsAll? ReasonsAll { get; set; }
 }
 
 [XmlRoot(ElementName="AirportDelays")]
 public class AirportDelays
 {
-    [XmlAttribute(AttributeName="key")]
+    [XmlElement(ElementName="key")]
     public string? Key { get; set; }
 
-    [XmlAttribute(AttributeName="icao_code")]
+    [XmlElement(ElementName="icao_code")]
     public string? ICAOCode { get; set; }
 
-    [XmlAttribute(AttributeName="iata_code")]
+    [XmlElement(ElementName="iata_code")]
     public string? IATACode { get; set; }
 
-    [XmlAttribute(AttributeName="faa_code")]
+    [XmlElement(ElementName="faa_code")]
     public string? FAACode { get; set; }
 
-    [XmlAttribute(AttributeName="airport_name")]
+    [XmlElement(ElementName="airport_name")]
     public string? AirportName { get; set; }
 
-    [XmlAttribute(AttributeName="local_airport_name")]
+    [XmlElement(ElementName="local_airport_name")]
     public string? LocalAirportName { get; set; }
 
-    [XmlAttribute(AttributeName="arrival")]
+    [XmlElement(ElementName="delays")]
+    public Delays? Delays { get; set; }
+
+    [XmlElement(ElementName="arrival")]
     public Arrival? Arrival { get; set; }
 
-    [XmlAttribute(AttributeName="departure")]
-    public Arrival? Departure { get; set; }
+    [XmlElement(ElementName="departure")]
+    public Departure? Departure { get; set; }
 
-    [XmlAttribute(AttributeName="process_time_gmt")]
+    [XmlElement(ElementName="process_time_gmt")]
     public int ProcessTimeGmt { get; set; }
 }

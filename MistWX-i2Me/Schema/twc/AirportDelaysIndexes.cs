@@ -6,9 +6,9 @@ namespace MistWX_i2Me.Schema.twc;
 [XmlRoot(ElementName="AirportDelayIndexes")]
 public class AirportDelayIndexes
 {
-    [XmlAttribute(AttributeName="key")]
+    [XmlElement(ElementName="key")]
     public string? Key { get; set; }
 
-    [XmlAttribute(AttributeName="indexes")]
+    [XmlElement(ElementName="indexes")]
     public string? Indexes { get; set; }
 }
