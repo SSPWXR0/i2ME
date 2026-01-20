@@ -151,21 +151,13 @@ public class AirportDelays : I2Record
     public async Task MakeRecord(GenericResponse<List<AirportEvent>>? result, UdpSender sender)
     {
         Log.Info("Creating AirportDelays.");
-        string ADPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelays");
-        if (!Directory.Exists(ADPath))
-        {
-            Directory.CreateDirectory(ADPath);
-        }
         if (result != null)
         {
-
                 string ADIdx = "";
-                string recordPath = "";
-                string recordScript = "";
+                string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelays.xml");
+                string recordScript = "<Data type=\"AirportDelays\">";
                 foreach (AirportEvent AE in result.ParsedData)
-                {
-                    recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelays",$"AirportDelays-{AE.airportId}.xml");
-                    recordScript = "<Data type=\"AirportDelays\">";
+                { 
                     Schema.twc.AirportDelays product = new()
                     {
                         Key = AE.airportId,
@@ -202,11 +194,10 @@ public class AirportDelays : I2Record
                     sw.Close();
 
                     recordScript += sw.ToString();
-                    recordScript += "</Data>";
-                    await File.WriteAllTextAsync(recordPath, ValidateXml(recordScript));
-                    sender.SendFile(recordPath, "storeData(QGROUP=__AirportDelays__,Feed=AirportDelays)");
                 }
-
+                recordScript += "</Data>";
+                await File.WriteAllTextAsync(recordPath, ValidateXml(recordScript));
+                sender.SendFile(recordPath, "storeData(QGROUP=__AirportDelays__,Feed=AirportDelays)");
                 // Make airport delay index
                 recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelaysIndexes.xml");
                 recordScript = "<Data type=\"AirportDelayIndexes\">";
