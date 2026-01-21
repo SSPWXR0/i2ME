@@ -84,7 +84,7 @@ public class Airquality
 }
 
 [XmlRoot(ElementName = "metadata")]
-public class Metadata
+public class AirQualityMetadata
 {
     [XmlElement(ElementName = "language")] public string? Language { get; set; }
 
@@ -101,6 +101,12 @@ public class Metadata
 
     [XmlElement(ElementName = "status_code")]
     public int StatusCode { get; set; }
+
+    [XmlElement(ElementName = "ClientKey")]
+    public string? ClientKey { get; set; }
+
+    [XmlElement(ElementName = "Date")]
+    public string? Date { get; set; }
 }
 
 [XmlRoot(ElementName = "response")]
@@ -109,7 +115,7 @@ public class AirQualityResponse
     [XmlElement(ElementName = "airquality")]
     public Airquality? Airquality { get; set; }
 
-    [XmlElement(ElementName = "metadata")] public Metadata? Metadata { get; set; }
+    [XmlElement(ElementName = "metadata")] public AirQualityMetadata? Metadata { get; set; }
 
     [XmlAttribute(AttributeName = "xmlns")]
     public string? Xmlns { get; set; }
