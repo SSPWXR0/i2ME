@@ -22,6 +22,7 @@ public class TideForecastMetadata
     public string? units { get; set; }
     public int status_code { get; set; }
 }
+[XmlRoot(ElementName = "metadata")]
 public class DailyForecastMetadata
 {
 

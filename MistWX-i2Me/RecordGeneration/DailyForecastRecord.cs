@@ -82,7 +82,8 @@ public class DailyForecastRecord : I2Record
 
         foreach (var result in results)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(DailyForecastResponse));
+            XmlSerializer mdserializer = new XmlSerializer(typeof(DailyForecastMetadata));
+            XmlSerializer fcserializer = new XmlSerializer(typeof(Forecasts));
             StringWriter sw = new StringWriter();
             XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
             {
@@ -111,7 +112,8 @@ public class DailyForecastRecord : I2Record
             }
             
             xw.WriteWhitespace("");
-            serializer.Serialize(xw, result.ParsedData);
+            mdserializer.Serialize(xw, result.ParsedData.Metadata);
+            fcserializer.Serialize(xw, result.ParsedData.Forecasts);
 
             recordScript +=
                 $"<DailyForecast id=\"000000000\" locationKey=\"{result.Location.coopId}\" isWxScan=\"0\">" +
