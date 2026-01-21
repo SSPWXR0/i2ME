@@ -19,7 +19,7 @@ public class AirQualityRecord : I2Record
             }
             
             recordScript +=
-                $"<AirQuality id=\"000000000\" locationKey=\"{result.Location.epaId}\" isWxScan=\"0\">" +
+                $"<AirQuality id=\"000000000\" locationKey=\"{result.Location.epaId}_{DateTime.UtcNow.ToString("yyyyMMdd")}_{((result.ParsedData.Airquality ?? new Airquality()).Airqualityreport ?? new List<Airqualityreport>()).First().DataType ?? "F"}\" isWxScan=\"0\">" +
                 $"{result.RawResponse}<clientKey>{result.Location.epaId}</clientKey></AirQuality>";
         }
         
