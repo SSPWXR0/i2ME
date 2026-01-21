@@ -78,10 +78,10 @@ public class DerivedHTRecordData
     public string? LonHmsphr { get; set; }
 
     [XmlElement(ElementName = "HTPrssrMB")]
-    public int PressureMB { get; set; }
+    public string? PressureMB { get; set; }
 
     [XmlElement(ElementName = "HTPrssrIn")]
-    public double PressureIn { get; set; }
+    public string? PressureIn { get; set; }
 
     [XmlElement(ElementName = "HTMxWndSpdMPH")]
     public int MaxWindSpeedMPH { get; set; }

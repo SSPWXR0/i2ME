@@ -141,7 +141,7 @@ public class TropicalAdvisoryCurrentPosition {
 	public TropicalAdvisoryHeadline? Headline { get; set; }
 
 	[XmlElement(ElementName="min_pressure")] 
-	public double MinPressure { get; set; }
+	public string? MinPressure { get; set; }
 
 	[XmlElement(ElementName="max_sustained_wind")] 
 	public int MaxSustainedWind { get; set; }
@@ -214,7 +214,7 @@ public class TropicalAdvisoryInfo {
 	public string? IssueDtTmTzAbbrv { get; set; } 
 
 	[XmlElement(ElementName="adv_num")] 
-	public int AdvNum { get; set; } 
+	public string? AdvNum { get; set; } 
 
 	[XmlElement(ElementName="adv_dt_tm")] 
 	public string? AdvDtTm { get; set; } 
@@ -259,6 +259,14 @@ public class TropicalAdvisoryInfo {
 	public TropicalAdvisoryCurrentPosition? CurrentPosition { get; set; } 
 }
 
+[XmlRoot(ElementName="advisoryinfo")]
+public class TropicalAdvisoryAdvisoryInfos { 
+
+	[XmlElement(ElementName="advisoryinfo")] 
+	public List<TropicalAdvisoryInfo>? AdvisoryInfo { get; set; }
+ 
+}
+
 [XmlRoot(ElementName="response")]
 public class TropicalAdvisoryResponse { 
 
@@ -266,6 +274,6 @@ public class TropicalAdvisoryResponse {
 	public TropicalAdvisoryMetadata? Metadata { get; set; } 
 
 	[XmlElement(ElementName="advisoryinfo")] 
-	public List<TropicalAdvisoryInfo>? AdvisoryInfo { get; set; }
+	public TropicalAdvisoryAdvisoryInfos? AdvisoryInfo { get; set; }
  
 }
