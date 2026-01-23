@@ -1,5 +1,6 @@
 using System.Drawing;
 using Pastel;
+using System.Collections.Concurrent;
 
 namespace MistWX_i2Me;
 
@@ -20,6 +21,8 @@ internal class Log
     private static LogLevel _logLevel = LogLevel.Debug;
 
     private static string LogStartDate = DateTime.Today.ToString("ddMMyyyy");
+
+    public static ConcurrentQueue<string> LogQ = new();
 
     private static string GetCurrentTime()
     {
@@ -47,7 +50,7 @@ internal class Log
         if (_logLevel > LogLevel.Debug) return;
         str = GetCurrentTime() + PREFIX_DEBUG + str;
         Console.WriteLine(str.Pastel(COLOR_DEBUG));
-        WriteLogToFile(str);
+        AddLogToQueue(str);
     }
     
     public static void Error(string str)
@@ -55,7 +58,7 @@ internal class Log
         if (_logLevel > LogLevel.Warning) return;
         str = GetCurrentTime() + PREFIX_ERROR + str;
         Console.WriteLine(str.Pastel(COLOR_ERROR));
-        WriteLogToFile(str);
+        AddLogToQueue(str);
     }
     
     public static void Warning(string str)
@@ -63,7 +66,7 @@ internal class Log
         if (_logLevel > LogLevel.Warning) return;
         str = GetCurrentTime() + PREFIX_WARNING + str;
         Console.WriteLine(str.Pastel(COLOR_WARNING));
-        WriteLogToFile(str);
+        AddLogToQueue(str);
     }
     
     public static void Info(string str)
@@ -71,11 +74,16 @@ internal class Log
         if (_logLevel > LogLevel.Info) return;
         str = GetCurrentTime() + PREFIX_INFO + str;
         Console.WriteLine(str.Pastel(COLOR_INFO));
-        WriteLogToFile(str);
+        AddLogToQueue(str);
     }
 
+    private static void AddLogToQueue(string str)
+    {
+        // adds string to queue for thread safety to avoid i2me around crashing if two tasks try to modify the log at the same time
+        LogQ.Enqueue(str);
+    }
 
-    private static void WriteLogToFile(string str)
+    public static void WriteLogToFile(string str)
     {
         // Create log folder
         if (!Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Logs")))

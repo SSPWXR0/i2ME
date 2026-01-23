@@ -359,4 +359,28 @@ public class TimedTasks
 
         }
     }
+
+    public static async Task LogHandler()
+    {
+        while (true)
+        {
+            if (!Log.LogQ.IsEmpty)
+            {
+                Log.LogQ.TryDequeue(out var log);
+                if (log != null)
+                {
+                    if (log is string)
+                    {
+                        Log.WriteLogToFile(log);
+                    }
+                }
+                
+            } else
+            {
+                Thread.Sleep(50);
+            }
+        }
+        
+    }
 }
+

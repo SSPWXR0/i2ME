@@ -190,8 +190,9 @@ public class Program
         Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.DConfig.RecordGenTimeSeconds);
         Task radarTask = TimedTasks.RadarTask(prioritySender, config.RadarConfiguration.RadarInt);
         Task clearAlertsCache = TimedTasks.ClearExpiredAlerts();
+        Task logHandler = TimedTasks.LogHandler();
         
-        await Task.WhenAll(checkAlerts, recordGenTask, radarTask, clearAlertsCache);
+        await Task.WhenAll(checkAlerts, recordGenTask, radarTask, clearAlertsCache, logHandler);
 
     }
 
