@@ -39,29 +39,66 @@ public class DailyForecastRecord : I2Record
             return "Q9820";
         }
         
-        // Rain chceks 
-        if (rain > 0.3)
+        // Rain checks 
+        if (iconCode == 1 ||
+            iconCode == 2 ||
+            iconCode == 3 ||
+            iconCode == 4 ||
+            iconCode == 9 ||
+            iconCode == 11 ||
+            iconCode == 12)
         {
-            return "Q9410";
-        } else
-        {
-            
+            if (rain > 0.3)
+            {
+                return "Q9410";
+            } 
         }
+        
         // Snow checks
-        if (snow >= 3)
+        if (iconCode == 5 ||
+            iconCode == 6 ||
+            iconCode == 7 ||
+            iconCode == 8 ||
+            iconCode == 10 ||
+            iconCode == 13 ||
+            iconCode == 14 ||
+            iconCode == 15 ||
+            iconCode == 16 ||
+            iconCode == 17 ||
+            iconCode == 18 ||
+            iconCode == 25 ||
+            iconCode == 35 ||
+            iconCode == 41 ||
+            iconCode == 42 ||
+            iconCode == 43 ||
+            iconCode == 46 )
         {
-            if (snow > 3 && snow <= 6)
+            if (snow >= 3)
             {
-                return "Q9010";
-            } else if (snow > 6 && snow <= 12)
-            {
-                return "Q9015";
-            } else if (snow > 12)
-            {
-                return "Q9020";
+                if (snow > 3 && snow <= 6)
+                {
+                    return "Q9010";
+                } else if (snow > 6 && snow <= 12)
+                {
+                    return "Q9015";
+                } else if (snow > 12)
+                {
+                    return "Q9020";
+                }
+                if (rain > 3 && rain <= 6)
+                {
+                    return "Q9010";
+                } else if (rain > 6 && rain <= 12)
+                {
+                    return "Q9015";
+                } else if (rain > 12)
+                {
+                    return "Q9020";
+                }
+                return "Q9005";
             }
-            return "Q9005";
         }
+        
         // Temp checks
         if (temp <= 32){
             if (iconCode == 8)
