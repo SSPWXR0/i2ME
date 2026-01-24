@@ -157,7 +157,6 @@ public class AirportDelays : I2Record
                 string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelays.xml");
                 string recordScript = "<Data type=\"AirportDelays\">";
                 DateTime expiration = DateTime.UtcNow;
-                expiration.AddHours(2);
                 foreach (AirportEvent AE in result.ParsedData)
                 { 
                     Schema.twc.AirportDelays product = new()
