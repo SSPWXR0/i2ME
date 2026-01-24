@@ -70,6 +70,15 @@ public class Delays
 [XmlRoot(ElementName="AirportDelays")]
 public class AirportDelays
 {
+    [XmlAttribute(AttributeName = "process_time_gmt")] 
+    public int ProcessTimeGmtAttr {get; set;}
+
+    [XmlAttribute(AttributeName = "locationKey")] 
+    public string? locationKey {get; set;}
+
+    [XmlAttribute(AttributeName = "key")] 
+    public string? KeyAttr {get; set;}
+
     [XmlElement(ElementName="key")]
     public string? Key { get; set; }
 

@@ -155,12 +155,15 @@ public class AirportDelays : I2Record
         {
                 string ADIdx = "";
                 string recordPath = Path.Combine(AppContext.BaseDirectory, "temp", "AirportDelays.xml");
-                string recordScript = "<Data type=\"AirportDelays\">";
+                string recordScript = "<Data type=\"AirportDelays\" >";
                 DateTime expiration = DateTime.UtcNow;
                 foreach (AirportEvent AE in result.ParsedData)
                 { 
                     Schema.twc.AirportDelays product = new()
                     {
+                        ProcessTimeGmtAttr = (int)((DateTimeOffset)expiration).ToUnixTimeSeconds(),
+                        KeyAttr = AE.airportId,
+                        locationKey = AE.airportId,
                         Key = AE.airportId,
                         ICAOCode = $"K{AE.airportId}",
                         IATACode = AE.airportId,
