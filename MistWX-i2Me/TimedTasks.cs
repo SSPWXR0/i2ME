@@ -292,6 +292,12 @@ public class TimedTasks
             watch.Restart();
             
             Log.Info("Running scheduled radar/satrad collection");
+
+            DirectoryInfo mapDir = new(Path.Combine(AppContext.BaseDirectory, "temp", "maps"));
+
+            // Delete all frames from the maps folder.
+            foreach(System.IO.FileInfo file in mapDir.GetFiles()) file.Delete();
+            foreach(System.IO.DirectoryInfo subDirectory in mapDir.GetDirectories()) subDirectory.Delete(true);
             
             // start grabbing all timestamps
             Log.Info($"Grabbing all radar/satrad timestamps...");

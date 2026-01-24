@@ -74,10 +74,6 @@ public class RadarProcess
 
         DirectoryInfo mapTypeDir = new(mapTypeDirPath);
         
-        // Delete all frames from the maptype.
-        foreach(System.IO.FileInfo file in mapTypeDir.GetFiles()) file.Delete();
-        foreach(System.IO.DirectoryInfo subDirectory in mapTypeDir.GetDirectories()) subDirectory.Delete(true);
-        
 
         ImageSequenceDef boundaries = BoundariesFromJSON(radar_type);
         Log.Debug("Imported boundaries from JSON");
