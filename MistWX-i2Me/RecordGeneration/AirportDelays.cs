@@ -184,6 +184,7 @@ public class AirportDelays : I2Record
                             Total = 1000
                         },
                         ProcessTimeGmt = (int)((DateTimeOffset)expiration).ToUnixTimeSeconds(),
+                        clientKey = AE.airportId
                     };
                     ADIdx += $"{AE.airportId},";
                     XmlSerializer serializer = new(typeof(Schema.twc.AirportDelays));

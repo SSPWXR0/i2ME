@@ -108,4 +108,7 @@ public class AirportDelays
 
     [XmlElement(ElementName="process_time_gmt")]
     public int ProcessTimeGmt { get; set; }
+
+    [XmlElement(ElementName="clientKey")]
+    public string? clientKey { get; set; }
 }
