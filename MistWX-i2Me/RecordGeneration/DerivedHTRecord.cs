@@ -38,6 +38,43 @@ public class DerivedHTRecord : I2Record
                             xw.WriteWhitespace("");
                             DateTime advDt = DateTime.Parse(result.AdvDtTm ?? "2026-01-19T04:00:00+04:00", null, System.Globalization.DateTimeStyles.None);
                             DateTime issueDt = DateTime.Parse(result.IssueDtTm ?? "2026-01-19T04:00:00+04:00", null, System.Globalization.DateTimeStyles.None);
+                            // Find out what kind of storm and map it to an i2 known type
+                            string? stormType = (result.CurrentPosition ?? new TropicalAdvisoryCurrentPosition()).StormType ?? null;
+                            if (stormType != null)
+                            {
+                                if (
+                                    stormType == "Tropical Depression" ||
+                                    stormType == "Subtropical Depression" 
+                                )
+                                {
+                                    stormType = "TROPICAL DEPRESSION";
+                                } else if (
+                                    stormType == "Hurricane" ||
+                                    stormType == "Post-tropical cyclone" ||
+                                    stormType == "Extratropical" ||
+                                    stormType == "Extra Tropical Low" ||
+                                    stormType == "Potential Tropical Cyclone" ||
+                                    stormType == "Typhoon" ||
+                                    stormType == "Super Typhoon" ||
+                                    stormType == "Tropical Cyclone"
+                                )
+                                {
+                                    stormType = "HURRICANE";
+                                } else if (
+                                    stormType == "Tropical Storm" ||
+                                    stormType == "Subtropical Storm" ||
+                                    stormType == "Remnants of"
+                                )
+                                {
+                                    stormType = "TROPICAL STORM";
+                                } else
+                                {
+                                    stormType = "TROPICAL STORM";
+                                }
+                            } else
+                            {
+                                stormType = "TROPICAL STORM";
+                            }
                             serializer.Serialize(xw, new DerivedHTRecordResponse()
                             {
                                 Index = HTIdx,
@@ -47,7 +84,7 @@ public class DerivedHTRecord : I2Record
                                     Pil = result.PIL,
                                     StrmId = new DerivedHTRecordStrmId()
                                     {
-                                        StrmNm = $"{(result.CurrentPosition ?? new TropicalAdvisoryCurrentPosition()).StormType ?? "".ToUpper()} {result.StormName ?? "".ToUpper()}",
+                                        StrmNm = $"{stormType} {(result.StormName ?? "").ToUpper()}",
                                         StrmId = result.StormID,
                                     },
                                     AdvsTmUTC = DateTime.UtcNow.ToString("yyyyMMddHHmm"),
