@@ -71,10 +71,10 @@ public class DerivedHTRecordData
     [XmlElement(ElementName = "HTLatHmsphr")]
     public string? LatHmsphr { get; set; }
 
-    [XmlElement(ElementName = "HTLon")]
+    [XmlElement(ElementName = "HTLong")]
     public double Lon { get; set; }
 
-    [XmlElement(ElementName = "HTLonHmsphr")]
+    [XmlElement(ElementName = "HTLongHmsphr")]
     public string? LonHmsphr { get; set; }
 
     [XmlElement(ElementName = "HTPrssrMB")]
