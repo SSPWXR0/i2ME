@@ -120,7 +120,7 @@ public class AirportDelays : I2Record
             category = "airport closure";
         } else
         {
-            reason = "";
+            reason = "Other";
             delay_sec = 0;
             color = "yellow";
             category = "arrival";
@@ -167,17 +167,19 @@ public class AirportDelays : I2Record
                         IATACode = AE.airportId,
                         FAACode = AE.airportId,
                         AirportName = AE.airportLongName,
-                        LocalAirportName = null,
+                        LocalAirportName = AE.airportLongName,
                         Delays = GenerateDelay(AE),
                         Arrival = new()
                         {
                             Cancellations = 0,
+                            Delays = 0,
                             PercentCancelled = 100,
                             Total = 1000
                         },
                         Departure = new()
                         {
                             Cancellations = 0,
+                            Delays = 0,
                             PercentCancelled = 100,
                             Total = 1000
                         },

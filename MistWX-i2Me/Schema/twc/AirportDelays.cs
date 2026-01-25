@@ -11,6 +11,9 @@ public class Arrival
     [XmlElement(ElementName="percentage_cancelled")]
     public int PercentCancelled { get; set; }
 
+    [XmlElement(ElementName="delays")]
+    public int Delays { get; set; }
+
     [XmlElement(ElementName="total")]
     public int Total { get; set; }
 }
@@ -23,6 +26,9 @@ public class Departure
 
     [XmlElement(ElementName="percentage_cancelled")]
     public int PercentCancelled { get; set; }
+
+    [XmlElement(ElementName="delays")]
+    public int Delays { get; set; }
 
     [XmlElement(ElementName="total")]
     public int Total { get; set; }
