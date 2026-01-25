@@ -447,7 +447,7 @@ public class AlertBulletin : I2Record
                     ESvrty = (int)(detail.severityCode ?? 0),
                     EExpTmUTC = expireTime,
                     EStTmUTC = locationInfo.gmtDiff ?? "",
-                    ESgnfcnc = detail.significance
+                    ESgnfcnc = (detail.significance ?? "")[0..1]
                 };
                 BStCd stateInfo = new()
                     {
@@ -499,7 +499,7 @@ public class AlertBulletin : I2Record
                 BHdln headline = new()
                 {
                     BHdlnTxt = detail.headlineText,
-                    BVocHdlnCd = MapVocalCode($"{detail.phenomena}_{detail.significance}")
+                    BVocHdlnCd = MapVocalCode($"{detail.phenomena}_{(detail.significance ?? "")[0..1]}")
                 };
 
                 BNarrTxt narrative = new()
@@ -517,9 +517,9 @@ public class AlertBulletin : I2Record
                 BERecord record = new() 
                 {
                     Id = "0000000",
-                    LocationKey = $"{detail.areaId}_{detail.phenomena}_{detail.significance}_{detail.eventTrackingNumber}_{detail.officeCode}",
+                    LocationKey = $"{detail.areaId}_{detail.phenomena}_{(detail.significance ?? "")[0..1]}_{detail.eventTrackingNumber}_{detail.officeCode}",
                     Action = "1",
-                    ClientKey = $"{detail.areaId}_{detail.phenomena}_{detail.significance}_{detail.eventTrackingNumber}_{detail.officeCode}",
+                    ClientKey = $"{detail.areaId}_{detail.phenomena}_{(detail.significance ?? "")[0..1]}_{detail.eventTrackingNumber}_{detail.officeCode}",
                     BEHdr = header,
                     BEData = data
                 };       
