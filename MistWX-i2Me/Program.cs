@@ -22,7 +22,7 @@ public class Program
                           "\n888 888888888  888       " +
                           "888 8888888888 ");
         
-        Console.WriteLine("This is MistWX-i2Me v1.4 RC 1 (Radar Update), bringing you Radar and few more changes!");
+        Console.WriteLine("This is MistWX-i2Me v1.4 RC 1 (Radar Update), bringing you Radar and a few more changes!");
         Console.WriteLine("(C) mewtek / MistWX & contributors 2026");
         Console.WriteLine("This project is licensed under the AGPL v3.0 license.");
         Console.WriteLine("Weather information collected from The National Weather Service & The Weather Company");
@@ -31,6 +31,44 @@ public class Program
 
         Config config = Config.Load();
 
+        // Check if custom folder exists
+        if (!Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Custom")))
+        {
+            Log.Info("Custom directory not made, making right now");
+            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom"));
+            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Mapping"));
+            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Config"));
+
+            File.Copy(
+                Path.Combine(AppContext.BaseDirectory, "Data", "LFRecord.db"),
+                Path.Combine(AppContext.BaseDirectory, "Custom", "LFRecord.db"));
+            File.Copy(
+                Path.Combine(AppContext.BaseDirectory, "Data", "Mapping", "HolidayMapping.xml"),
+                Path.Combine(AppContext.BaseDirectory, "Custom", "Mapping", "HolidayMapping.xml"));
+        }
+
+        // Check if Data/Config folder exists
+        if (!Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Data", "Config")))
+        {
+            Log.Info("Data/Config directory not made, making right now");
+            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Data", "Config"));
+
+            Log.Info("Copying ImageSequenceDefs.xml to Data/Config");
+
+            if (File.Exists(config.ImageSequenceDefs))
+            {
+                string copyPath = Path.Combine(AppContext.BaseDirectory, "Data", "Config", "ImageSequenceDefs.xml");
+                File.Copy(config.ImageSequenceDefs, copyPath);
+            }
+
+            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "Data", "Config", "ImageSequenceDefs.xml")))
+            {
+                Log.Error("Unable to locate ImageSequenceDefs.xml");
+            }
+        }
+
+        // do we have an api key?
+        // if so, the user probably pirated it. freeloader.
         if (config.APIConfig.TwcApiKey == "REPLACE_ME" || String.IsNullOrEmpty(config.APIConfig.TwcApiKey))
         {
             Log.Error("No weather.com API key is currently set.");
@@ -39,19 +77,6 @@ public class Program
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
             return;
-        }
-        
-        // Check if custom folder exists
-        if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Custom")) != true)
-        {
-            Log.Info("Custom directory not made, making right now");
-            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom"));
-            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Mapping"));
-            Directory.CreateDirectory(Path.Combine(AppContext.BaseDirectory, "Custom", "Config"));
-
-            File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","LFRecord.db"),Path.Combine(AppContext.BaseDirectory, "Custom","LFRecord.db"));
-            File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","Mapping","HolidayMapping.xml"),Path.Combine(AppContext.BaseDirectory, "Custom","Mapping","HolidayMapping.xml"));
-            File.Copy(Path.Combine(AppContext.BaseDirectory, "Data","Config","ImageSequenceDefs.xml"),Path.Combine(AppContext.BaseDirectory, "Custom","Config","ImageSequenceDefs.xml"));
         }
 
         UdpSender routineSender = new UdpSender(config.UnitConfig.I2MsgAddress, config.UnitConfig.RoutineMsgPort,
@@ -186,7 +211,6 @@ public class Program
             locations = locs.ToArray<string>();
         }
 
-        
         Task checkAlerts = TimedTasks.CheckForAlerts(locations, prioritySender, config.AConfig.CheckAlertTimeSeconds);
         Task recordGenTask = TimedTasks.RecordGenTask(locations, routineSender, config.DConfig.RecordGenTimeSeconds);
         Task radarTask = TimedTasks.RadarTask(prioritySender, config.RadarConfiguration.RadarInt);
@@ -194,7 +218,6 @@ public class Program
         Task logHandler = TimedTasks.LogHandler();
         
         await Task.WhenAll(checkAlerts, recordGenTask, radarTask, clearAlertsCache, logHandler);
-
     }
 
     /// <summary>

@@ -25,6 +25,13 @@ public class Config
     public XmlComment MPCComment { get { return new XmlDocument().CreateComment("Path to your MachineProductCfg."); } set { } }
     public string MachineProductConfig { get; set; } =
         "C:\\Program Files (x86)\\TWC\\i2\\Managed\\Config\\MachineProductCfg.xml";
+    
+    // incase you need custom maps for locations outside of the US
+    [XmlAnyElement("ImageSequenceDefsComment")]
+    public XmlComment ImageSequenceDefsComment { get { return new XmlDocument().CreateComment("Path to your ImageSequenceDefs."); } set { } }
+    public string ImageSequenceDefs { get; set; } =
+        "C:\\Program Files (x86)\\TWC\\i2\\Managed\\Config\\ImageSequenceDefs.xml";
+
 
     // Config Elements \\
     [XmlElement("APIKeyConfig")] public APIKeyConfig APIConfig { get; set; } = new APIKeyConfig();
