@@ -58,7 +58,9 @@ public class Program
             if (File.Exists(config.ImageSequenceDefs))
             {
                 string copyPath = Path.Combine(AppContext.BaseDirectory, "Data", "Config", "ImageSequenceDefs.xml");
+                string customPath = Path.Combine(AppContext.BaseDirectory, "Custom", "Config", "ImageSequenceDefs.xml");
                 File.Copy(config.ImageSequenceDefs, copyPath);
+                File.Copy(config.ImageSequenceDefs, customPath);
             }
 
             if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "Data", "Config", "ImageSequenceDefs.xml")))
