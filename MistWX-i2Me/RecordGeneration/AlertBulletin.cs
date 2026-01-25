@@ -1,10 +1,8 @@
-using System.Security.Cryptography.X509Certificates;
-
-using Dapper;
 using MistWX_i2Me.API;
-using MistWX_i2Me.API.Products;
+using System.Xml.Serialization;
 using MistWX_i2Me.Schema.ibm;
 using MistWX_i2Me.Schema.System;
+using System.Security.Policy;
 
 namespace MistWX_i2Me.RecordGeneration;
 
@@ -390,6 +388,178 @@ public class AlertBulletin : I2Record
 
     public async Task<BERecordRoot?> MakeRecord(List<GenericResponse<AlertDetailResponse>> alertDetails)
     {
+
+        List<string> allowedZones = new();
+
+        // Read from MachineProductCfg
+        string copyPath = Path.Combine(AppContext.BaseDirectory, "MachineProductConfig.xml");
+        MachineProductConfig? mpc = null;
+        
+        using (StreamReader reader = new(copyPath))
+        {
+            XmlSerializer serializer = new(typeof(MachineProductConfig));
+            if (reader != null)
+            {
+                mpc = (MachineProductConfig?)serializer.Deserialize(reader);
+            } else
+            {
+                throw new Exception("MachineProductCfg could not be read!");
+            }
+            
+        }
+
+        if (mpc != null)
+        {
+            if (mpc.ConfigDef != null)
+            {
+                if (mpc.ConfigDef.ConfigItems != null)
+                {
+                    if (mpc.ConfigDef.ConfigItems.ConfigItem != null)
+                    {
+                        foreach (ConfigItem i in mpc.ConfigDef.ConfigItems.ConfigItem)
+                        {
+                            if (i.Key != null)
+                            {
+                                if (i.Key == "primaryZone")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        allowedZones.Add(i.Value);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                } else if (i.Key == "primaryCounty")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        allowedZones.Add(i.Value);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                } else if (i.Key == "primaryMarineZone")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        allowedZones.Add(i.Value);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                } else if (i.Key == "secondaryCounties")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        string[] split = i.Value.Split(",");
+                                        foreach (string zone in split)
+                                        {
+                                            allowedZones.Add(zone);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                } else if (i.Key == "secondaryCounties")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        string[] split = i.Value.Split(",");
+                                        foreach (string zone in split)
+                                        {
+                                            allowedZones.Add(zone);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                } else if (i.Key == "secondaryZones")
+                                {
+                                    if (string.IsNullOrEmpty(i.Value))
+                                    {
+                                        continue;
+                                    }
+                                    try
+                                    {
+                                        string[] split = i.Value.Split(",");
+                                        foreach (string zone in split)
+                                        {
+                                            allowedZones.Add(zone);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Debug($"Failed to configure locations for {i.Key}");
+                                        Log.Debug(ex.Message);
+                                        // Print stacktrace to the debug console if applicable
+                                        if (!string.IsNullOrEmpty(ex.StackTrace))
+                                        {
+                                            Log.Debug(ex.StackTrace);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+            
         
         List<BERecord> alerts = new();
         BERecordRoot root = new()
@@ -413,6 +583,13 @@ public class AlertBulletin : I2Record
             // Timestamp parsing
             if (detail != null)
             {
+                if (
+                    !allowedZones.Contains(detail.areaId ?? "")
+                )
+                {
+                    Log.Warning($"Alert {detail.areaId}_{detail.phenomena}_{(detail.significance ?? "")[0..1]}_{detail.eventTrackingNumber}_{detail.officeCode} is not part of the primaryCounty, primaryZone, primaryMarineZone, secondaryCounties, or secondaryZones in the MPC.");
+                    continue;
+                }
                 string endTime = DateTimeOffset.FromUnixTimeSeconds((int)(detail.expireTimeUTC ?? 0)).ToString("yyyy MM dd HH mm").Replace(" ", "");
                 string expireTime = DateTimeOffset.FromUnixTimeSeconds((int)(detail.expireTimeUTC?? 0)).ToString("yyyy MM dd HH mm").Replace(" ", "");
                 string issueTime = DateTime.Parse(detail.issueTimeLocal ?? "").ToString("yyyy MM dd HH mm").Replace(" ", "");
