@@ -116,32 +116,37 @@ public class Headlines : I2Record
         int key = 0;
         if (results.BERecord != null)
         {
+            List<String> addedAlerts = new();
             foreach (var result in results.BERecord)
             {
-                Headline headline = new()
-                {
-                    key = key,
-                    procTm = System.DateTime.Now.ToString("yyyyMMddHHmmss"),
-                    expiration = (((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).EExpTmUTC ?? "0") + "00",
-                    vocalCd = ((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BVocHdlnCd ?? "",
-                    priority = priorities[((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).ESgnfcnc ?? "A"],
-                    significance = ((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).ESgnfcnc ?? "A",
-                    text = ((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BHdlnTxt ?? "",
-                    phenomena = ((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).EPhenom ?? "",
-                    vocalSeq = new()
+                string alertCheck = (((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).EPhenom ?? "") + "_" + (((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).ESgnfcnc ?? "A");
+                if (!addedAlerts.Contains(alertCheck)) {
+                    Headline headline = new()
                     {
-                        audioSeq = new ()
+                        key = key,
+                        procTm = System.DateTime.Now.ToString("yyyyMMddHHmmss"),
+                        expiration = (((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).EExpTmUTC ?? "0") + "00",
+                        vocalCd = ((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BVocHdlnCd ?? "",
+                        priority = priorities[((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).ESgnfcnc ?? "A"],
+                        significance = ((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).ESgnfcnc ?? "A",
+                        text = ((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BHdlnTxt ?? "",
+                        phenomena = ((result.BEHdr ?? new BEHdr()).BEvent ?? new BEvent()).EPhenom ?? "",
+                        vocalSeq = new()
                         {
-                            code = "HE",
-                            audioClip = new()
+                            audioSeq = new ()
                             {
-                                path = "domestic/vocalLocal/Cantore/Headline_Event_Phrases\\" + _vocalCodes[((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BVocHdlnCd ?? ""] + ".wav"
+                                code = "HE",
+                                audioClip = new()
+                                {
+                                    path = "domestic/vocalLocal/Cantore/Headline_Event_Phrases\\" + _vocalCodes[((result.BEData ?? new BEData()).BHdln ?? new BHdln()).BVocHdlnCd ?? ""] + ".wav"
+                                }
                             }
                         }
-                    }
-                };
-                HlList.Add(headline);
-                key += 1;
+                    };
+                    HlList.Add(headline);
+                    key += 1;
+                    addedAlerts.Add(alertCheck);
+                }
             }
             // Sort by priority
             HlList = HlList.OrderByDescending(a => a.priority).ToList();
