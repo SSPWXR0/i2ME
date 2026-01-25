@@ -43,10 +43,10 @@ public class HolidayMapping : I2Record
             // Sort by how recent the event was
             result.Holidays = result.Holidays.OrderBy(a => DateTime.ParseExact(a.Date, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("MMddyyyy")).ToList();
         }
-        
 
+        // we have to force US date formatting, otherwise certain presentations on the I2 WILL fail.
         XmlSerializer serializer = new XmlSerializer(typeof(HolidayMappingResponse));
-        StringWriter sw = new StringWriter();
+        StringWriter sw = new StringWriter(CultureInfo.GetCultureInfo("en-US"));
         XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
         {
             OmitXmlDeclaration = true,
