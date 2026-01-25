@@ -421,7 +421,7 @@ public class Config
 
         [XmlAnyElement("RadarIntComment")]
         public XmlComment RadarIntComment { get { return new XmlDocument().CreateComment("Set how often should radar update. Default is 300."); } set { } }
-        [XmlElement] public int RadarInt { get; set; } = 300;
+        [XmlElement] public int RadarInt { get; set; } = 900;
 
         [XmlAnyElement("LocalRadarComment")]
         public XmlComment LocalRadarComment { get { return new XmlDocument().CreateComment("Grab the tiles nearby the center of your map instead of the entire map. Set to true since downloading every single tile for the national map takes a lot of time."); } set { } }
