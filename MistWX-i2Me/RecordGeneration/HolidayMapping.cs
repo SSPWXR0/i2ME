@@ -23,30 +23,30 @@ public class HolidayMapping : I2Record
             {
                 DateTime date = DateTime.ParseExact(holiday.Date ?? "20260119", "yyyyMMdd", provider);
                 DateTime dateNew = new(DateTime.Now.Year, date.Month, date.Day, date.Hour, date.Minute, date.Second);
-                DateTime now = DateTime.Now;
+                DateTime now = DateTime.ParseExact(DateTime.Now.ToString("yyyyMMdd"), "yyyyMMdd", provider);
 
-                Log.Debug($"It is currently {now.ToString()}");
+                Log.Debug($"It is currently {now}");
 
                 if (now > dateNew)
                 {
                     Log.Debug($"Holiday {holiday.Name} has already past,");
                     DateTime newDate = new(dateNew.Year + 1, date.Month, date.Day, date.Hour, date.Minute, date.Second);
                     Log.Debug($"new date is {newDate.ToString()}");
-                    holiday.Date = newDate.ToString("yyyyMMdd");
-                    holiday.DateFormatted = newDate.ToString("MM/dd/yyyy");
+                    holiday.Date = newDate.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                    holiday.DateFormatted = newDate.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
                     continue;
                 }
 
-                holiday.Date = dateNew.ToString("yyyyMMdd");
-                holiday.DateFormatted = dateNew.ToString("MM/dd/yyyy");
+                holiday.Date = dateNew.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                holiday.DateFormatted = dateNew.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
             }
             // Sort by how recent the event was
             result.Holidays = result.Holidays.OrderBy(a => DateTime.ParseExact(a.Date, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("MMddyyyy")).ToList();
         }
-        
 
+        // we have to force US date formatting, otherwise certain presentations on the I2 WILL fail.
         XmlSerializer serializer = new XmlSerializer(typeof(HolidayMappingResponse));
-        StringWriter sw = new StringWriter();
+        StringWriter sw = new StringWriter(CultureInfo.GetCultureInfo("en-US"));
         XmlWriter xw = XmlWriter.Create(sw, new XmlWriterSettings
         {
             OmitXmlDeclaration = true,
