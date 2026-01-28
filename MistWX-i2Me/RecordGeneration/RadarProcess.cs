@@ -228,7 +228,7 @@ public class RadarProcess
 
         foreach ((int ts, Image[] imageList) in actualImages)
         {
-            taskList.Add(ProcessRadarFrame(imageList, radarFrames[ts], combinedCoords.ToArray(), ts, new Point<int>(bounds.XStart, bounds.XEnd), mapTypeDirPath, sender, radar_type));
+            taskList.Add(ProcessRadarFrame(imageList, radarFrames[ts], combinedCoords.ToArray(), ts, bounds, mapTypeDirPath, sender, radar_type, new(boundaries.OriginalImageWidth, boundaries.OriginalImageHeight)));
             Log.Debug($"Added task to process radar frame {ts}");
         }
 
@@ -236,23 +236,27 @@ public class RadarProcess
         Log.Debug("Awaited all tasks");
     }
 
-    public static async Task ProcessRadarFrame(Image[] imgs, Image frame, Point<int>[] coords, int ts, Point<int> tileStart, string dir_path, UdpSender sender, string radar_type)
+    private static async Task ProcessRadarFrame(Image[] imgs, Image frame, Point<int>[] coords, int ts, TileImageBounds bounds, string dir_path, UdpSender sender, string radar_type, Point<int> OGSize)
     {
         Log.Debug($"Processing frame {ts}");
 
         // Composite all tiles to frame.
-        int[] xSet = coords.Select(p => Math.Abs((p.X - tileStart.X) * 256)).ToArray();
-        int[] ySet = coords.Select(p => Math.Abs((p.Y - tileStart.Y) * 256)).ToArray();
+        int[] xSet = coords.Select(p => Math.Abs((p.X - bounds.XStart) * 256)).ToArray();
+        int[] ySet = coords.Select(p => Math.Abs((p.Y - bounds.XEnd) * 256)).ToArray();
 
         frame = frame.Composite(imgs, new Enums.BlendMode[]{Enums.BlendMode.Add}, xSet, ySet).Flatten();
         Log.Debug($"Frame {ts} stitched");
         // Frame recolor
         frame = PaletteConvert(frame);
         Log.Debug($"Frame {ts} recolored");
+        // Frame crop.
+        frame = frame.Crop(bounds.UpperLeftX, bounds.UpperLeftY, bounds.LowerRightX - bounds.UpperLeftX, bounds.LowerRightY - bounds.UpperLeftY);
+        // Frame resize.
+        frame = frame.Resize(OGSize.X / frame.Width, vscale: OGSize.Y / frame.Height);
         
         // Save frame.
         string framePath = Path.Combine(dir_path, $"{ts}.tiff");
-        frame.WriteToFile(framePath);
+        frame.Tiffsave(framePath, compression: Enums.ForeignTiffCompression.Lzw);
         Log.Debug($"Frame {ts} saved to {framePath}");
 
         // Split radar type.
