@@ -315,15 +315,18 @@ public class Base
                     {
                         response = response.Replace(unitTag, "imperial");
                         response = response.Replace($"</{unitTag}>", "</imperial>");
+                        
+                        if (vocalKeyVal != null)
+                        {
+                            string newVocalKey = vocalKeyBuilder(temp, iconCodeExt);
+                            response = response.Replace(vocalKeyVal, newVocalKey);
+                        }
                     }
+                    
                 }
             
 
-                if (vocalKeyVal != null)
-                {
-                    string newVocalKey = vocalKeyBuilder(temp, iconCodeExt);
-                    response = response.Replace(vocalKeyVal, newVocalKey);
-                }
+                
             }
             
             string data = GetInnerXml(response);
